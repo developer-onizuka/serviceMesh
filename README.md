@@ -9,48 +9,87 @@ To consider it, it is necessary to understand independent dimensions of configur
 
 # 1. Without Istio service mesh
 
-- If Container-A has a logic accessing to Container-B in the same cluster, the access goes through svc-B because it needs to have the stable IP not by a ephemeral IP.
-- If Container-A has a logic accessing to Container-C in the diffrent cluster, it is not reachable because ClusterIP is not shared each other even though clusters are located in same network.
+- If EndPoint-A has a logic accessing to Container-B in the same cluster, the access goes through svc-B because it needs to have the stable IP not by a ephemeral IP.
+- If EndPoint-A has a logic accessing to Container-B in the diffrent cluster, it is not reachable because ClusterIP is not shared each other even though clusters are located in same network.
 
 Kube-proxy creates an iptables rule for each of the backend Pods in the Service as you can see below:
 ```
-Cluster1                                             Cluster2
-+-----------------------------------------------+    +-----------------------------------------------+
-|           ClusterIP (10.105.235.xxx)          |    |           ClusterIP (10.108.214.xxx)          |
-|           -----+-------+---------+-------+--  |    |           -----+-------+---------+-------+--  |
-|                |       |         |       |    |    |                |       |         |       |    |
-| +-----+   +----+----+  |    +----+----+  |    |    | +-----+   +----+----+  |    +----+----+  |    |
-| |Kube-|   |  svc-A  |  |    |  svc-B  |  |    |    | |Kube |   |  svc-C  |  |    |  svc-D  |  |    |
-| |Proxy|-->|(iptable)|  |    |(iptable)|  |    |    | |Proxy|-->|(iptable)|  |    |(iptable)|  |    |
-| +-----+   +---------+  |    +---------+  |    |    | +-----+   +---------+  |    +---------+  |    |
-|                        |                 |    |    |                        |                 |    |
-|           +-Pod-----+  |    +-Pod-----+  |    |    |           +-Pod-----+  |    +-Pod-----+  |    |
-|           |  cnt-A  +--+    |  cnt-B  +--+    |    |           |  cnt-C  +--+    |  cnt-D  +--+    |
-|           +---------+       +---------+       |    |           +---------+       +---------+       |
-+-----------------------------------------------+    +-----------------------------------------------+
+Cluster1                                              Cluster2
++-------------------------------------------------+    +-------------------------------------------------+
+|           ClusterIP (10.105.235.xxx)            |    |           ClusterIP (10.108.214.xxx)            |
+|           -----+--------+---------+--------+--  |    |           -----+--------+---------+--------+--  |
+|                |        |         |        |    |    |                |        |         |        |    |
+| +-----+   +----+-----+  |    +----+-----+  |    |    | +-----+   +----+-----+  |    +----+-----+  |    |
+| |Kube-|   |  svc-A   |  |    |  svc-B   |  |    |    | |Kube |   |  svc-B   |  |    |  svc-C   |  |    |
+| |Proxy|-->|(iptable) |  |    |(iptable) |  |    |    | |Proxy|-->|(iptable) |  |    |(iptable) |  |    |
+| +-----+   +----------+  |    +----------+  |    |    | +-----+   +----------+  |    +----------+  |    |
+|                         |                  |    |    |                         |                  |    |
+|           +-Pod------+  |    +-Pod------+  |    |    |           +-Pod------+  |    +-Pod------+  |    |
+|           | EndPnt-A +--+    | EndPnt-B +--+    |    |           | EndPnt-B +--+    | EndPnt-C +--+    |
+|           +----------+       +----------+       |    |           +----------+       +----------+       |
++-------------------------------------------------+    +-------------------------------------------------+
 ```
 
 Of cource you can expose services to outside thru LoadBalancer and Ingress so that comunicate between clusters as followings:
 ```
-Cluster1                                             Cluster2
-     +--------------+                                     +--------------+                            
-+----| LoadBalancer |---------------------------+    +----| LoadBalancer |---------------------------+
-|    +----+---------+                           |    |    +----+---------+                           |
-|         |                                     |    |         |                                     | 
-|    +----+----+                                |    |    +----+----+                                | 
-|    | Ingress |                                |    |    | Ingress |                                |
-|    +----+----+                                |    |    +----+----+                                |
-|         | ClusterIP (10.105.235.xxx)          |    |         | ClusterIP (10.108.214.xxx)          |
-|    -----+------+-------+---------+-------+--  |    |    -----+------+-------+---------+-------+--  |
-|                |       |         |       |    |    |                |       |         |       |    |
-| +-----+   +----+----+  |    +----+----+  |    |    | +-----+   +----+----+  |    +----+----+  |    |
-| |Kube-|   |  svc-A  |  |    |  svc-B  |  |    |    | |Kube |   |  svc-C  |  |    |  svc-D  |  |    |
-| |Proxy|-->|(iptable)|  |    |(iptable)|  |    |    | |Proxy|-->|(iptable)|  |    |(iptable)|  |    |
-| +-----+   +---------+  |    +---------+  |    |    | +-----+   +---------+  |    +---------+  |    |
-|                        |                 |    |    |                        |                 |    |
-|           +-Pod-----+  |    +-Pod-----+  |    |    |           +-Pod-----+  |    +-Pod-----+  |    |
-|           |  cnt-A  +--+    |  cnt-B  +--+    |    |           |  cnt-C  +--+    |  cnt-D  +--+    |
-|           +---------+       +---------+       |    |           +---------+       +---------+       |
-+-----------------------------------------------+    +-----------------------------------------------+
+Cluster1                                               Cluster2
+     +--------------+                                       +--------------+                            
++----| LoadBalancer |-----------------------------+    +----| LoadBalancer |-----------------------------+
+|    +----+---------+                             |    |    +----+---------+                             |
+|         |                                       |    |         |                                       | 
+|    +----+----+                                  |    |    +----+----+                                  | 
+|    | Ingress |                                  |    |    | Ingress |                                  |
+|    +----+----+                                  |    |    +----+----+                                  |
+|         | ClusterIP (10.105.235.xxx)            |    |         | ClusterIP (10.108.214.xxx)            |
+|    -----+------+--------+---------+--------+--  |    |    -----+------+--------+---------+--------+--  |
+|                |        |         |        |    |    |                |        |         |        |    |
+| +-----+   +----+-----+  |    +----+-----+  |    |    | +-----+   +----+-----+  |    +----+-----+  |    |
+| |Kube-|   |  svc-A   |  |    |  svc-B   |  |    |    | |Kube |   |  svc-B   |  |    |  svc-C   |  |    |
+| |Proxy|-->|(iptable) |  |    |(iptable) |  |    |    | |Proxy|-->|(iptable) |  |    |(iptable) |  |    |
+| +-----+   +----------+  |    +----------+  |    |    | +-----+   +----------+  |    +----------+  |    |
+|                         |                  |    |    |                         |                  |    |
+|           +-Pod------+  |    +-Pod------+  |    |    |           +-Pod------+  |    +-Pod------+  |    |
+|           | EndPnt-A +--+    | EndPnt-B +--+    |    |           | EndPnt-B +--+    | EndPnt-C +--+    |
+|           +----------+       +----------+       |    |           +----------+       +----------+       |
++-------------------------------------------------+    +-------------------------------------------------+
 ```
+
+# 2. With Istio service mesh
+
+- If EndPoint-A has a logic accessing to Service-B, the access is hi-jacked by Envoy proxy in each pod. The access travels along on service mesh. 
+- There is an endpoint of Service-B in each cluster (both Cluster1 and Cluster2). So, the access from EndPoint-A will go to either EndPoint-B in Cluster1 or in Cluster2.
+
+The following is a case of 
+- multiple cluster
+- single network
+- single control plane
+- single mesh
+
+```
+Cluster1                                               Cluster2
+     +--------------+                                       +--------------+                            
++----| LoadBalancer |-----------------------------+    +----| LoadBalancer |-----------------------------+
+|    +----+---------+                             |    |    +----+---------+                             |
+|         |                                       |    |         |                                       | 
+|    +----+----+                                  |    |    +----+----+                                  | 
+|    | Ingress |                                  |    |    | Ingress |                                  |
+|    +----+----+                                  |    |    +----+----+                                  |
+|         | ClusterIP (10.105.235.xxx)            |    |         | ClusterIP (10.108.214.xxx)            |
+|    -----+------+--------+---------+--------+--  |    |    -----+------+--------+---------+--------+--  |
+|                |        |         |        |    |    |                |        |         |        |    |
+| +-----+   +----+-----+  |    +----+-----+  |    |    | +-----+   +----+-----+  |    +----+-----+  |    |
+| |Kube-|   |  svc-A   |  |    |  svc-B   |  |    |    | |Kube |   |  svc-B   |  |    |  svc-C   |  |    |
+| |Proxy|-->|(iptable) |  |    |(iptable) |  |    |    | |Proxy|-->|(iptable) |  |    |(iptable) |  |    |
+| +-----+   +----------+  |    +----------+  |    |    | +-----+   +----------+  |    +----------+  |    |
+|                         |                  |    |    |                         |                  |    |
+|           +-Pod------+  |    +-Pod------+  |    |    |           +-Pod------+  |    +-Pod------+  |    |
+| +------+  | +-----+  |  |    | +-----+  |  |   Mesh Network      | +-----+  |  |    | +-----+  |  |    |
+| |Istiod|--->|Proxy|============|Proxy|=============================|Proxy|============|Proxy|==========|
+| +------+  | +-----+  |  |    | +-----+  |  |    |    |           | +-----+  |  |    | +-----+  |  |    |
+|           | EndPnt-A +--+    | EndPnt-B +--+    |    |           | EndPnt-B +--+    | EndPnt-C +--+    |
+|           +----------+       +----------+       |    |           +----------+       +----------+       |
++-------------------------------------------------+    +-------------------------------------------------+
+```
+
+
 
