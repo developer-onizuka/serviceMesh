@@ -113,6 +113,7 @@ Cluster1                                                Cluster2
 
 # 3. With multiple Istio service mesh in the same network
 - To enable communication between two meshes with different CAs, you must exchange the trust bundles of the meshes. 
+- Istio Citadel is for CA.
 
 The following is a case of 
 - multiple cluster
