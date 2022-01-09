@@ -103,7 +103,7 @@ Cluster1                                                Cluster2
 | |  CA  |                                         | |  |                                                  | |
 | +------+                                         | |  |                                                  | |
 +--------------------------------------------------+ |  +--------------------------------------------------+ |
-                                                     | mTLS between Istio Proxys                             |
+                                                     | mTLS between Istio proxies                            |
                                                      +=======================================================+ 
 ```
 
@@ -142,7 +142,7 @@ Cluster1                                                Cluster2
 | |  CA  |                                         | |  | |  CA  |                                         | |
 | +------+ with Cluster2's Trust Bundles           | |  | +------+ with Cluster1's Trust Bundles           | |
 +--------------------------------------------------+ |  +--------------------------------------------------+ |
-                                                     | mTLS between Istio Proxys                             |
+                                                     | mTLS between Istio proxies                            |
                                                      +=======================================================+ 
 ```
 
@@ -158,7 +158,7 @@ The following is a case of
 - multiple mesh
 
 ```
-                                      mTLS between Istio Proxys with TLS pass-through
+                                      mTLS between Istio proxies with TLS pass-through
                                     +=======================================================+ 
                                     |                                                       |
      +--------------+          +----+---------+              +--------------+          +----+---------+ 
