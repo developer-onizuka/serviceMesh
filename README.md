@@ -42,7 +42,9 @@ Cluster1                                                Cluster2
 Of cource you can expose services to outside thru LoadBalancer and Ingress so that comunicate between clusters as followings:
 ```
 Cluster1                                                Cluster2
-     +--------------+                                        +--------------+                            
+      consumers                                               consumers
+          |                                                       |
+     +----+---------+                                        +----+---------+                            
 +----| LoadBalancer |------------------------------+    +----| LoadBalancer |------------------------------+
 |    +----+---------+                              |    |    +----+---------+                              |
 |         |                                        |    |         |                                        | 
@@ -79,7 +81,9 @@ The following is a case of
 
 ```
 Cluster1                                                Cluster2
-     +--------------+                                        +--------------+                            
+      consumers                                               consumers
+          |                                                       |
+     +----+---------+                                        +----+---------+                            
 +----| LoadBalancer |------------------------------+    +----| LoadBalancer |------------------------------+
 |    +----+---------+                              |    |    +----+---------+                              |
 |         |                                        |    |         |                                        | 
@@ -118,7 +122,9 @@ The following is a case of
 
 ```
 Cluster1                                                Cluster2
-     +--------------+                                        +--------------+                            
+      consumers                                               consumers
+          |                                                       |
+     +----+---------+                                        +----+---------+                            
 +----| LoadBalancer |------------------------------+    +----| LoadBalancer |------------------------------+
 |    +----+---------+                              |    |    +----+---------+                              |
 |         |                                        |    |         |                                        | 
@@ -160,8 +166,9 @@ The following is a case of
 ```
                                       mTLS between Istio proxies with TLS pass-through
                                     +=======================================================+ 
-                                    |                                                       |
-     +--------------+          +----+---------+              +--------------+          +----+---------+ 
+      consumers                     |                         consumers                     | 
+          |                         |                             |                         |
+     +----+---------+          +----+---------+              +----+---------+          +----+---------+ 
 +----| LoadBalancer |----------| LoadBalancer |----+    +----| LoadBalancer |----------| LoadBalancer |----+
 |    +----+---------+          +----+---------+    |    |    +----+---------+          +----+---------+    | 
 |         |                         |              |    |         |                         |              | 
@@ -187,3 +194,45 @@ The following is a case of
 +--------------------------------------------------+    +--------------------------------------------------+ 
 Cluster1                                                Cluster2
 ```
+
+# 5. Joining virtual machines into the mesh 
+Istio provides two mechanisms to represent virtual machine workloads:
+- WorkloadGroup represents a logical group of virtual machine workloads that share common properties. This is similar to a Deployment in Kubernetes.
+- WorkloadEntry represents a single instance of a virtual machine workload. This is similar to a Pod in Kubernetes.
+- In order for consumers to reliably call your workload, it’s recommended to declare a Service association. (But I don't draw it in the figure below.)
+
+With this configuration, requests to product would be load-balanced across both the pod and virtual machine workload instances.
+
+See also https://istio.io/latest/docs/ops/deployment/vm-architecture/.
+```
+                                      mTLS between Istio proxies with TLS pass-through
+                                    +=======================================================+========================================+
+      consumers                     |                          consumers                    |                                        |
+          |                         |                             |                         |                                        |
+     +----+---------+          +----+---------+              +----+---------+          +----+---------+                              |
++----| LoadBalancer |----------| LoadBalancer |----+    +----| LoadBalancer |----------| LoadBalancer |----+    +--VirtualMachine--+ |
+|    +----+---------+          +----+---------+    |    |    +----+---------+          +----+---------+    |    |                  | |
+|         |                         |              |    |         |                         |              |    |                  | |
+|    +----+--------------+     +----+------------+ |    |    +----+--------------+     +----+------------+ |    |                  | |
+|    | IngressController |     | IngressGateway  | |    |    | IngressController |     | IngressGateway  | |    |                  | |
+|    +----+--------------+     +---------------+-+ |    |    +----+--------------+     +---------------+-+ |    |                  | |
+|         | ClusterIP (10.105.235.xxx)         |   |    |         | ClusterIP (10.108.214.xxx)         |   |    |                  | |
+|    -----+------+--------+---------+--------+ |   |    |    -----+------+--------+---------+--------+ |   |    |                  | |
+|                |        |         |        | |   |    |                |        |         |        | |   |    |                  | |
+| +------+  +----+-----+  |    +----+-----+  | |   |    | +------+  +----+-----+  |    +----+-----+  | |   |    |                  | |
+| | Kube |  |  svc-A   |  |    |  svc-B   |  | |   |    | | Kube |  |  svc-B   |  |    |  svc-C   |  | |   |    |                  | |
+| | Prxy |-->(iptable) |  |  -->(iptable) |  | |   |    | | Prxy |-->(iptable) |  |  -->(iptable) |  | |   |    |                  | |
+| +------+  +----------+  |    +----------+  | |   |    | +------+  +----------+  |    +----------+  | |   |    |                  | |
+|                         |                  | |   |    |                         |                  | |   |    |                  | |
+|           +-Pod------+  |    +-Pod------+  | |   |    |           +-Pod------+  |    +-Pod------+  | |   |    |   +----------+   | |
+| +------+  | +------+ |  |    | +------+ |  | |   |    | +------+  | +------+ |  |    | +------+ |  | |   |    |   | +------+ |   | |
+| |Istiod|--->| Prxy |===========| Prxy |======+   |    | |Istiod|--->| Prxy |===========| Prxy |======+   |    |   | | Prxy |=======+
+| +--+---+  | +------+ |  |    | +------+ |  |     |    | +--+---+  | +------+ |  |    | +------+ |  |     |    |   | +------+ |   |
+|    |      | EndPnt-A +--+    | EndPnt-B +--+     |    |    |      | EndPnt-B +--+    | EndPnt-C +--+     |    |   | EndPnt-C |   | 
+| +--+---+  +----------+       +----------+        |    | +--+---+  +----------+       +----------+        |    |   +----------+   | 
+| |  CA  |                                         |    | |  CA  |                                         |    |                  | 
+| +------+ with Cluster2's Trust Bundles           |    | +------+ with Cluster1's Trust Bundles           |    |                  | 
++--------------------------------------------------+    +--------------------------------------------------+    +------------------+
+Cluster1                                                Cluster2
+```
+
