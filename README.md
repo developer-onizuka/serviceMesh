@@ -156,7 +156,7 @@ The following is a case of
 - multiple mesh
 
 ```
-                                      mTLS between Istio Proxys
+                                      mTLS between Istio Proxys with TLS pass-through
                                     +*******************************************************+ 
                                     |                                                       |
      +--------------+          +----+---------+              +--------------+          +----+---------+ 
