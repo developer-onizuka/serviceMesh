@@ -67,6 +67,7 @@ Cluster1                                                Cluster2
 
 - If EndPoint-A has a logic accessing to Service-B, the access is hi-jacked by Envoy proxy in the pod. The access travels along on service mesh. 
 - There is an endpoint of Service-B in each cluster (both Cluster1 and Cluster2). So, the access from EndPoint-A will go to either EndPoint-B in Cluster1 or in Cluster2.
+- An Istio control plane manages traffic within the mesh by providing each proxy with the list of service endpoints.
 - Each cluster must have a DNS entry for the service in order for the DNS lookup to succeed, and a request to be successfully sent. This is true even if there are no instances of that service’s pods running in the cluster which makes requests.
 - For clusters spanning networks, this can be achieved by exposing the control plane through an Istio gateway. (But I don't draw the Istio gateway in the figure below, because of no space to draw it and it also gets so complicating to understand.)
 
