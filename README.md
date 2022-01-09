@@ -2,7 +2,7 @@
 
 To consider it, it is necessary to understand independent dimensions of configuration for an Istio deployment as below:
 
-- single or multiple cluster
+- single or multiple cluster  --> But what I'm interested in is a behavior of multi-cluster case only.
 - single or multiple network
 - single or multiple control plane
 - single or multiple mesh
@@ -54,9 +54,9 @@ Cluster1                                               Cluster2
 +-------------------------------------------------+    +-------------------------------------------------+
 ```
 
-# 2. With Istio service mesh
+# 2. With a single Istio service mesh in the same network
 
-- If EndPoint-A has a logic accessing to Service-B, the access is hi-jacked by Envoy proxy in each pod. The access travels along on service mesh. 
+- If EndPoint-A has a logic accessing to Service-B, the access is hi-jacked by Envoy proxy in the pod. The access travels along on service mesh. 
 - There is an endpoint of Service-B in each cluster (both Cluster1 and Cluster2). So, the access from EndPoint-A will go to either EndPoint-B in Cluster1 or in Cluster2.
 
 The following is a case of 
@@ -83,13 +83,52 @@ Cluster1                                               Cluster2
 | +-----+   +----------+  |    +----------+  |    |    | +-----+   +----------+  |    +----------+  |    |
 |                         |                  |    |    |                         |                  |    |
 |           +-Pod------+  |    +-Pod------+  |    |    |           +-Pod------+  |    +-Pod------+  |    |
-| +------+  | +-----+  |  |    | +-----+  |  |   Mesh Network      | +-----+  |  |    | +-----+  |  |    |
-| |Istiod|--->|Proxy|============|Proxy|=============================|Proxy|============|Proxy|==========|
 | +------+  | +-----+  |  |    | +-----+  |  |    |    |           | +-----+  |  |    | +-----+  |  |    |
-|           | EndPnt-A +--+    | EndPnt-B +--+    |    |           | EndPnt-B +--+    | EndPnt-C +--+    |
-|           +----------+       +----------+       |    |           +----------+       +----------+       |
-+-------------------------------------------------+    +-------------------------------------------------+
+| |Istiod|--->|Proxy|============|Proxy|============+  |           | |Proxy|============|Proxy|============+
+| +------+  | +-----+  |  |    | +-----+  |  |    | |  |           | +-----+  |  |    | +-----+  |  |    | |
+|           | EndPnt-A +--+    | EndPnt-B +--+    | |  |           | EndPnt-B +--+    | EndPnt-C +--+    | |
+|           +----------+       +----------+       | |  |           +----------+       +----------+       | |
++-------------------------------------------------+ |  +-------------------------------------------------+ |
+                                                    | Mesh Network                                         |
+                                                    +------------------------------------------------------+
 ```
 
+# 3. With multiple Istio service mesh in the same network
+- To enable communication between two meshes with different CAs, you must exchange the trust bundles of the meshes. 
 
+The following is a case of 
+- multiple cluster
+- single network
+- multiple control plane
+- multiple mesh
+
+```
+Cluster1                                               Cluster2
+     +--------------+                                       +--------------+                            
++----| LoadBalancer |-----------------------------+    +----| LoadBalancer |-----------------------------+
+|    +----+---------+                             |    |    +----+---------+                             |
+|         |                                       |    |         |                                       | 
+|    +----+----+                                  |    |    +----+----+                                  | 
+|    | Ingress |                                  |    |    | Ingress |                                  |
+|    +----+----+                                  |    |    +----+----+                                  |
+|         | ClusterIP (10.105.235.xxx)            |    |         | ClusterIP (10.108.214.xxx)            |
+|    -----+------+--------+---------+--------+--  |    |    -----+------+--------+---------+--------+--  |
+|                |        |         |        |    |    |                |        |         |        |    |
+| +-----+   +----+-----+  |    +----+-----+  |    |    | +-----+   +----+-----+  |    +----+-----+  |    |
+| |Kube-|   |  svc-A   |  |    |  svc-B   |  |    |    | |Kube |   |  svc-B   |  |    |  svc-C   |  |    |
+| |Proxy|-->|(iptable) |  |    |(iptable) |  |    |    | |Proxy|-->|(iptable) |  |    |(iptable) |  |    |
+| +-----+   +----------+  |    +----------+  |    |    | +-----+   +----------+  |    +----------+  |    |
+|                         |                  |    |    |                         |                  |    |
+|           +-Pod------+  |    +-Pod------+  |    |    |           +-Pod------+  |    +-Pod------+  |    |
+| +------+  | +-----+  |  |    | +-----+  |  |    |    | +------+  | +-----+  |  |    | +-----+  |  |    |
+| |Istiod|--->|Proxy|============|Proxy|============+  |Istiod|--->|Proxy|============|Proxy|==============+
+| +--+---+  | +-----+  |  |    | +-----+  |  |    | |  | +--+---+  | +-----+  |  |    | +-----+  |  |    | |
+|    |      | EndPnt-A +--+    | EndPnt-B +--+    | |  |    |      | EndPnt-B +--+    | EndPnt-C +--+    | |
+| +--+---+  +----------+       +----------+       | |  | +--+---+  +----------+       +----------+       | |
+| |  CA  |                                        | |  | |  CA  |                                        | |
+| +------+                                        | |  | +------+                                        | |
++-------------------------------------------------+ |  +-------------------------------------------------+ |
+                                                    | mTLS                                                 |
+                                                    +******************************************************+ 
+```
 
