@@ -10,7 +10,7 @@ To consider it, it is necessary to understand independent dimensions of configur
 # 1. Without Istio service mesh
 
 - If Container-A has a logic accessing to Container-B in the same cluster, the access goes through svc-B because it needs to have the stable IP not by a ephemeral IP.
-- If Container-A has a logic accessing to Container-C in the diffrent cluster, it is not reachable because ClusterIP is not shared each other.
+- If Container-A has a logic accessing to Container-C in the diffrent cluster, it is not reachable because ClusterIP is not shared each other even though clusters are located in same network.
 
 ```
 Cluster1                                       Cluster2
