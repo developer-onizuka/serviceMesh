@@ -148,7 +148,7 @@ Cluster1                                                Cluster2
 
 # 4. With multiple Istio service mesh in different network
 - In order to ensure secure communications in a multi-network scenario, Istio only supports cross-network communication to workloads with an Istio proxy. This is due to the fact that Istio exposes services at the Ingress Gateway with TLS pass-through, which enables mTLS directly to the workload.
-- IngressGateway consumes "virtualservice", while IngressController consumes "Ingress" as a resouce.
+- IngressGateway consumes "VirtualService", while IngressController consumes "Ingress" as a resouce.
 - You may use Intel QAT for acceleration of TLS process in Istio proxy using Intel QAT device plugin. (https://01.org/kubernetes/solutions/QAT-envoy-solution)
 
 The following is a case of 
