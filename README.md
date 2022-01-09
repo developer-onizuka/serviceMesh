@@ -15,10 +15,10 @@ To consider it, it is necessary to understand independent dimensions of configur
 
 The following is a case of
 
-multiple cluster
-single network
-no control plane
-no mesh
+- multiple cluster
+- single network
+- no control plane
+- no mesh
 ```
 Cluster1                                              Cluster2
 +-------------------------------------------------+    +-------------------------------------------------+
