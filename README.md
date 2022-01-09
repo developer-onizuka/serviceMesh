@@ -134,7 +134,7 @@ Cluster1                                               Cluster2
 |    |      | EndPnt-A +--+    | EndPnt-B +--+    | |  |    |      | EndPnt-B +--+    | EndPnt-C +--+    | |
 | +--+---+  +----------+       +----------+       | |  | +--+---+  +----------+       +----------+       | |
 | |  CA  |                                        | |  | |  CA  |                                        | |
-| +------+ with Cluster2's Trust Bundle           | |  | +------+ with Cluster1's Trust Bundle           | |
+| +------+ with Cluster2's Trust Bundles          | |  | +------+ with Cluster1's Trust Bundles          | |
 +-------------------------------------------------+ |  +-------------------------------------------------+ |
                                                     | mTLS                                                 |
                                                     +******************************************************+ 
@@ -177,7 +177,7 @@ The following is a case of
 |    |      | EndPnt-A +--+    | EndPnt-B +--+    |    |    |      | EndPnt-B +--+    | EndPnt-C +--+    | 
 | +--+---+  +----------+       +----------+       |    | +--+---+  +----------+       +----------+       | 
 | |  CA  |                                        |    | |  CA  |                                        | 
-| +------+ with Cluster2's Trust Bundle           |    | +------+ with Cluster1's Trust Bundle           | 
+| +------+ with Cluster2's Trust Bundles          |    | +------+ with Cluster1's Trust Bundles          | 
 +-------------------------------------------------+    +-------------------------------------------------+ 
 Cluster1                                               Cluster2
 ```
