@@ -205,6 +205,12 @@ Istio provides two mechanisms to represent virtual machine workloads:
 With this configuration, requests to product would be load-balanced across both the pod and virtual machine workload instances.
 
 See also https://istio.io/latest/docs/ops/deployment/vm-architecture/.
+
+The following is a case of 
+- multiple cluster       (2 Clusters)
+- multiple network       (3 Networks)
+- multiple control plane (2 Controle Planes)
+- multiple mesh          (3 Meshes if VirtualMachine has an independent CA rather than Cluster1 and2.)
 ```
                                       mTLS between Istio proxies with TLS pass-through
                                     +=======================================================+========================================+
