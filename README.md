@@ -228,7 +228,7 @@ See also https://istio.io/latest/docs/ops/deployment/vm-architecture/.
 | +------+  | +------+ |  |    | +------+ |  | |   |    | +------+  | +------+ |  |    | +------+ |  | |   |    |   | +------+ |   | |
 | |Istiod|--->| Prxy |===========| Prxy |======+   |    | |Istiod|--->| Prxy |===========| Prxy |======+   |    |   | | Prxy |=======+
 | +--+---+  | +------+ |  |    | +------+ |  |     |    | +--+---+  | +------+ |  |    | +------+ |  |     |    |   | +------+ |   |
-|    |      | EndPnt-A +--+    | EndPnt-B +--+     |    |    |      | EndPnt-B +--+    | EndPnt-C +--+     |    |   | EndPnt-C |   | 
+|    |      | EndPnt-A +--+    | EndPnt-B +--+     |    |    |      | EndPnt-B +--+    | EndPnt-C +--+     |    |   | EndPnt-B |   | 
 | +--+---+  +----------+       +----------+        |    | +--+---+  +----------+       +----------+        |    |   +----------+   | 
 | |  CA  |                                         |    | |  CA  |                                         |    |                  | 
 | +------+ with Cluster2's Trust Bundles           |    | +------+ with Cluster1's Trust Bundles           |    |                  | 
