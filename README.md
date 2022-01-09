@@ -7,6 +7,8 @@ To consider it, it is necessary to understand independent dimensions of configur
 - single or multiple control plane
 - single or multiple mesh
 
+See also https://istio.io/latest/docs/ops/deployment/deployment-models.
+
 # 1. Without Istio service mesh
 
 - If EndPoint-A has a logic accessing to Container-B in the same cluster, the access goes through svc-B because it needs to have the stable IP not by a ephemeral IP.
