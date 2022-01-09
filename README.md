@@ -11,7 +11,8 @@ To consider it, it is necessary to understand independent dimensions of configur
 
 - If EndPoint-A has a logic accessing to Container-B in the same cluster, the access goes through svc-B because it needs to have the stable IP not by a ephemeral IP.
 - If EndPoint-A has a logic accessing to Container-B in the diffrent cluster, it is not reachable because ClusterIP is not shared each other even though clusters are located in same network.
-- Kube-proxy creates an iptables rule for each of the backend Pods in the Service as you can see below:
+- Kube-proxy creates an iptables rule for each of the backend Pods in the Service.
+- After catching the traffic sent to the ClusterIP, iptables forwards that traffic directly to one of the backend Pod using DNAT. 
 
 The following is a case of
 
