@@ -247,3 +247,65 @@ Cluster1                                                Cluster2                
                                                                                                              in the cluster1 or2
 ```
 
+# 5-1. How to join virtual machines into the mesh
+https://istio.io/latest/docs/setup/install/virtual-machine/
+
+# 5-1-1. Master node in kubernetes cluster
+```
+VM_APP="nginx"
+VM_NAMESPACE="vmcluster"
+WORK_DIR="${HOME}/vmintegration"
+SERVICE_ACCOUNT="nginxonmyvm"
+CLUSTER_NETWORK=""
+VM_NETWORK=""
+CLUSTER="Kubernetes"
+```
+```
+# mkdir -p $WORK_DIR
+# kubectl create namespace "${VM_NAMESPACE}"
+# kubectl create serviceaccount "${SERVICE_ACCOUNT}" -n "${VM_NAMESPACE}"
+```
+```
+# kubectl get --raw /api/v1 | jq '.resources[] | select(.name | index("serviceaccounts/token"))'
+{
+  "name": "serviceaccounts/token",
+  "singularName": "",
+  "namespaced": true,
+  "group": "authentication.k8s.io",
+  "version": "v1",
+  "kind": "TokenRequest",
+  "verbs": [
+    "create"
+  ]
+}
+```
+(See also https://istio.io/latest/docs/ops/best-practices/security/#configure-third-party-service-account-tokens)
+
+```
+# cat <<EOF > workloadgroup.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: WorkloadGroup
+metadata:
+  name: "${VM_APP}"
+  namespace: "${VM_NAMESPACE}"
+spec:
+  metadata:
+    labels:
+      app: "${VM_APP}"
+  template:
+    serviceAccount: "${SERVICE_ACCOUNT}"
+    network: "${VM_NETWORK}"
+EOF
+```
+```
+# istioctl x workload entry configure -f workloadgroup.yaml -o "${WORK_DIR}" --clusterID "${CLUSTER}"
+Warning: a security token for namespace "vmcluster" and service account "nginxonmyvm" has been generated and stored at "/root/vmintegration/istio-token"
+2022-01-10T05:37:08.373544Z	warn	Could not auto-detect IP for. Use --ingressIP to manually specify the Gateway address to reach istiod from the VM.%!(EXTRA string=istiod.istio-system.svc, string=istio-system)
+Configuration generation into directory /root/vmintegration was successful
+```
+```
+# cd $HOME
+# tar cvfz vmintegration.tar.gz vmintegration/
+# scp -p vmintegration.tar.gz vagrant@<ipaddress of vm>:/home/vagrant/
+```
+
