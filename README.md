@@ -317,6 +317,50 @@ virtualservice.networking.istio.io/istiod-vs created
 # kubectl get gateway -n istio-system 
 NAME             AGE
 istiod-gateway   6m29s
+
+# kubectl describe services istio-eastwestgateway -n istio-system 
+Name:                     istio-eastwestgateway
+Namespace:                istio-system
+Labels:                   app=istio-eastwestgateway
+                          install.operator.istio.io/owning-resource=eastwest
+                          install.operator.istio.io/owning-resource-namespace=istio-system
+                          istio=eastwestgateway
+                          istio.io/rev=default
+                          operator.istio.io/component=IngressGateways
+                          operator.istio.io/managed=Reconcile
+                          operator.istio.io/version=1.12.0
+                          release=istio
+Annotations:              <none>
+Selector:                 app=istio-eastwestgateway,istio=eastwestgateway
+Type:                     LoadBalancer
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       10.109.121.104
+IPs:                      10.109.121.104
+LoadBalancer Ingress:     192.168.121.222
+Port:                     status-port  15021/TCP
+TargetPort:               15021/TCP
+NodePort:                 status-port  30712/TCP
+Endpoints:                10.10.45.212:15021
+Port:                     tls  15443/TCP
+TargetPort:               15443/TCP
+NodePort:                 tls  30132/TCP
+Endpoints:                10.10.45.212:15443
+Port:                     tls-istiod  15012/TCP
+TargetPort:               15012/TCP
+NodePort:                 tls-istiod  30919/TCP
+Endpoints:                10.10.45.212:15012
+Port:                     tls-webhook  15017/TCP
+TargetPort:               15017/TCP
+NodePort:                 tls-webhook  32284/TCP
+Endpoints:                10.10.45.212:15017
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:
+  Type    Reason        Age                  From             Message
+  ----    ------        ----                 ----             -------
+  Normal  nodeAssigned  9m28s (x6 over 74m)  metallb-speaker  announcing from node "worker1"
+  Normal  nodeAssigned  9m27s (x4 over 74m)  metallb-speaker  announcing from node "worker9"
 ```
 
 (4) Check if third party tokens are enabled in your cluster.
