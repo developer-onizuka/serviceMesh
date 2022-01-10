@@ -258,8 +258,8 @@ VM_APP="vmapp"
 VM_NAMESPACE="vmnamespace"
 WORK_DIR="/home/vagrant/vmintegration"
 SERVICE_ACCOUNT="mysvcaccount"
-CLUSTER_NETWORK=""
-VM_NETWORK=""
+CLUSTER_NETWORK="kube-network"
+VM_NETWORK="vm-network"
 CLUSTER="cluster1"
 ```
 (2) Make a work directory.
@@ -297,7 +297,10 @@ This will install the Istio 1.12.1 default profile with ["Istio core" "Istiod" "
 Thank you for installing Istio 1.12.  Please take a few minutes to tell us about your install/upgrade experience!  https://forms.gle/FegQbc9UvePd4Z9z7
 ```
 ```
-# istio-1.12.1/samples/multicluster/gen-eastwest-gateway.sh --single-cluster | istioctl install -y -f -
+# istio-1.12.1/samples/multicluster/gen-eastwest-gateway.sh \
+--mesh mesh1 --cluster "${CLUSTER}" --network "${CLUSTER_NETWORK}" | \
+istioctl install -y -f -
+
 ✔ Ingress gateways installed
 ✔ Installation complete
 Making this installation the default for injection and validation.
