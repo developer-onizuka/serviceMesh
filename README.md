@@ -268,7 +268,58 @@ CLUSTER="Kubernetes"
 # kubectl create namespace "${VM_NAMESPACE}"
 # kubectl create serviceaccount "${SERVICE_ACCOUNT}" -n "${VM_NAMESPACE}"
 ```
-(3) Check if third party tokens are enabled in your cluster.
+(3) Install the Istio control plane
+```
+# export PATH=$PATH:istio-1.12.0/bin
+# cat <<EOF > ./vm-cluster.yaml
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: istio
+spec:
+  values:
+    global:
+      meshID: mesh1
+      multiCluster:
+        clusterName: "${CLUSTER}"
+      network: "${CLUSTER_NETWORK}"
+EOF
+
+# istioctl install -f vm-cluster.yaml 
+This will install the Istio 1.12.0 default profile with ["Istio core" "Istiod" "Ingress gateways"] components into the cluster. Proceed? (y/N) y
+✔ Istio core installed                                                                                                   
+✔ Istiod installed                                                                                                       
+✔ Ingress gateways installed                                                                                             
+✔ Installation complete                                                                                                  Making this installation the default for injection and validation.
+
+Thank you for installing Istio 1.12.  Please take a few minutes to tell us about your install/upgrade experience!  https://forms.gle/FegQbc9UvePd4Z9z7
+
+# istio-1.12.0/samples/multicluster/gen-eastwest-gateway.sh --single-cluster | istioctl install -y -f -
+✔ Ingress gateways installed                                                                                             
+✔ Installation complete                                                                                                  Making this installation the default for injection and validation.
+
+# kubectl get services -n istio-system 
+NAME                    TYPE           CLUSTER-IP       EXTERNAL-IP       PORT(S)                                                           AGE
+grafana                 ClusterIP      10.108.127.191   <none>            3000/TCP                                                          40d
+istio-eastwestgateway   LoadBalancer   10.109.121.104   192.168.121.222   15021:30712/TCP,15443:30132/TCP,15012:30919/TCP,15017:32284/TCP   31s
+istio-ingressgateway    LoadBalancer   10.109.196.134   192.168.121.220   15021:32009/TCP,80:31573/TCP,443:30508/TCP                        46d
+istiod                  ClusterIP      10.106.237.193   <none>            15010/TCP,15012/TCP,443/TCP,15014/TCP                             46d
+jaeger-collector        ClusterIP      10.96.213.158    <none>            14268/TCP,14250/TCP,9411/TCP                                      40d
+kiali                   ClusterIP      10.111.125.228   <none>            20001/TCP,9090/TCP                                                40d
+prometheus              ClusterIP      10.105.226.168   <none>            9090/TCP                                                          40d
+tracing                 ClusterIP      10.110.179.103   <none>            80/TCP,16685/TCP                                                  40d
+zipkin                  ClusterIP      10.98.78.32      <none>            9411/TCP
+
+# kubectl apply -n istio-system -f istio-1.12.0/samples/multicluster/expose-istiod.yaml 
+gateway.networking.istio.io/istiod-gateway created
+virtualservice.networking.istio.io/istiod-vs created
+
+# kubectl get gateway -n istio-system 
+NAME             AGE
+istiod-gateway   6m29s
+```
+
+(4) Check if third party tokens are enabled in your cluster.
 - See also https://istio.io/latest/docs/ops/best-practices/security/#configure-third-party-service-account-tokens
 ```
 # kubectl get --raw /api/v1 | jq '.resources[] | select(.name | index("serviceaccounts/token"))'
@@ -284,7 +335,7 @@ CLUSTER="Kubernetes"
   ]
 }
 ```
-(4) Make a Yaml file for workloadgroup.
+(5) Make a Yaml file for workloadgroup.
 ```
 # cat <<EOF > workloadgroup.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -301,11 +352,10 @@ spec:
     network: "${VM_NETWORK}"
 EOF
 ```
-(5) Generate the istio-token and Copy it to the VM which you want to join into the cluster.
+(6) Generate the istio-token and Copy it to the VM which you want to join into the cluster.
 ```
 # istioctl x workload entry configure -f workloadgroup.yaml -o "${WORK_DIR}" --clusterID "${CLUSTER}"
 Warning: a security token for namespace "vmcluster" and service account "nginxonmyvm" has been generated and stored at "/root/vmintegration/istio-token"
-2022-01-10T05:37:08.373544Z	warn	Could not auto-detect IP for. Use --ingressIP to manually specify the Gateway address to reach istiod from the VM.%!(EXTRA string=istiod.istio-system.svc, string=istio-system)
 Configuration generation into directory /root/vmintegration was successful
 ```
 ```
@@ -313,4 +363,52 @@ Configuration generation into directory /root/vmintegration was successful
 # tar cvfz vmintegration.tar.gz vmintegration/
 # scp -p vmintegration.tar.gz vagrant@<ipaddress of vm>:/home/vagrant/
 ```
+
+# 5-1-2. Virtual Machine
+
+```
+$ tar xvfz vmintegration.tar.gz
+$ cd vmintegration
+$ sudo mkdir -p /etc/certs
+$ sudo cp root-cert.pem /etc/certs/
+$ sudo mkdir -p /var/run/secrets/tokens
+$ sudo cp istio-token /var/run/secrets/tokens/
+```
+
+```
+curl -LO https://storage.googleapis.com/istio-release/releases/1.12.1/deb/istio-sidecar.deb
+sudo dpkg -i istio-sidecar.deb
+```
+
+```
+$ sudo cp cluster.env /var/lib/istio/envoy/
+$ sudo cp mesh.yaml /etc/istio/config/mesh
+$ sudo sh -c 'cat hosts >> /etc/hosts'
+```
+```
+$ cat /etc/hosts |grep istiod
+192.168.121.220 istiod.istio-system.svc
+```
+
+```
+$ sudo mkdir -p /etc/istio/proxy
+$ sudo chown -R istio-proxy /var/lib/istio /etc/certs /etc/istio/proxy /etc/istio/config /var/run/secrets /etc/certs/root-cert.pem
+```
+
+```
+$ sudo systemctl start istio
+$ tail -f  /var/log/istio/istio.log 
+2022-01-10T07:58:16.870269Z	info	cache	generated new workload certificate	latency=155.330246ms ttl=23h59m59.129746458s
+2022-01-10T07:58:16.870317Z	info	cache	Root cert has changed, start rotating root cert
+2022-01-10T07:58:16.870328Z	info	ads	XDS: Incremental Pushing:0 ConnectedEndpoints:2 Version:
+2022-01-10T07:58:16.870491Z	info	cache	returned workload trust anchor from cache	ttl=23h59m59.129511057s
+2022-01-10T07:58:16.870672Z	info	cache	returned workload trust anchor from cache	ttl=23h59m59.129331341s
+2022-01-10T07:58:16.871142Z	info	ads	SDS: PUSH request for node:mvc.vmcluster resources:1 size:1.1kB resource:ROOTCA
+2022-01-10T07:58:16.871190Z	info	cache	returned workload trust anchor from cache	ttl=23h59m59.128812634s
+2022-01-10T07:58:16.871224Z	info	ads	SDS: PUSH for node:mvc.vmcluster resources:1 size:1.1kB resource:ROOTCA
+2022-01-10T07:58:16.870736Z	info	cache	returned workload certificate from cache	ttl=23h59m59.129265584s
+2022-01-10T07:58:16.871953Z	info	ads	SDS: PUSH request for node:mvc.vmcluster resources:1 size:4.0kB resource:default
+
+```
+
 
