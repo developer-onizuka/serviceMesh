@@ -254,10 +254,10 @@ https://istio.io/latest/docs/setup/install/virtual-machine/
 
 (1) Set some environment valuse.
 ```
-VM_APP="nginx"
-VM_NAMESPACE="vmcluster"
+VM_APP="vmapp"
+VM_NAMESPACE="vmnamespace"
 WORK_DIR="${HOME}/vmintegration"
-SERVICE_ACCOUNT="nginxonmyvm"
+SERVICE_ACCOUNT="mysvcaccount"
 CLUSTER_NETWORK=""
 VM_NETWORK=""
 CLUSTER="Kubernetes"
