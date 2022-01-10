@@ -175,6 +175,8 @@ The following is a case of
 |         |                         |              |    |         |                         |              | 
 |    +----+--------------+     +----+------------+ |    |    +----+--------------+     +----+------------+ |  
 |    | IngressController |     | IngressGateway  | |    |    | IngressController |     | IngressGateway  | |
+|    | routing between   |     | routing between | |    |    | routing between   |     | routing between | | 
+|    | services          |     | virtualservices | |    |    | services          |     | virtualservices | |
 |    +----+--------------+     +---------------+-+ |    |    +----+--------------+     +---------------+-+ |
 |         | ClusterIP (10.105.235.xxx)         |   |    |         | ClusterIP (10.108.214.xxx)         |   |
 |    -----+------+--------+---------+--------+ |   |    |    -----+------+--------+---------+--------+ |   |
