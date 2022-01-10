@@ -251,6 +251,8 @@ Cluster1                                                Cluster2                
 https://istio.io/latest/docs/setup/install/virtual-machine/
 
 # 5-1-1. Master node in kubernetes cluster
+
+(1) Set some environment valuse.
 ```
 VM_APP="nginx"
 VM_NAMESPACE="vmcluster"
@@ -260,11 +262,14 @@ CLUSTER_NETWORK=""
 VM_NETWORK=""
 CLUSTER="Kubernetes"
 ```
+(2) Make a work directory.
 ```
 # mkdir -p $WORK_DIR
 # kubectl create namespace "${VM_NAMESPACE}"
 # kubectl create serviceaccount "${SERVICE_ACCOUNT}" -n "${VM_NAMESPACE}"
 ```
+(3) Check if third party tokens are enabled in your cluster.
+- See also https://istio.io/latest/docs/ops/best-practices/security/#configure-third-party-service-account-tokens
 ```
 # kubectl get --raw /api/v1 | jq '.resources[] | select(.name | index("serviceaccounts/token"))'
 {
@@ -279,8 +284,7 @@ CLUSTER="Kubernetes"
   ]
 }
 ```
-(See also https://istio.io/latest/docs/ops/best-practices/security/#configure-third-party-service-account-tokens)
-
+(4) Make a Yaml file for workloadgroup.
 ```
 # cat <<EOF > workloadgroup.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -297,6 +301,7 @@ spec:
     network: "${VM_NETWORK}"
 EOF
 ```
+(5) Generate the istio-token and Copy it to the VM which you want to join into the cluster.
 ```
 # istioctl x workload entry configure -f workloadgroup.yaml -o "${WORK_DIR}" --clusterID "${CLUSTER}"
 Warning: a security token for namespace "vmcluster" and service account "nginxonmyvm" has been generated and stored at "/root/vmintegration/istio-token"
