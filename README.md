@@ -418,8 +418,8 @@ $ sudo cp istio-token /var/run/secrets/tokens/
 ```
 
 ```
-curl -LO https://storage.googleapis.com/istio-release/releases/1.12.1/deb/istio-sidecar.deb
-sudo dpkg -i istio-sidecar.deb
+$ curl -LO https://storage.googleapis.com/istio-release/releases/1.12.1/deb/istio-sidecar.deb
+$ sudo dpkg -i istio-sidecar.deb
 ```
 
 ```
@@ -439,17 +439,17 @@ $ sudo chown -R istio-proxy /var/lib/istio /etc/certs /etc/istio/proxy /etc/isti
 
 ```
 $ sudo systemctl start istio
-$ tail -f  /var/log/istio/istio.log 
-2022-01-10T07:58:16.870269Z	info	cache	generated new workload certificate	latency=155.330246ms ttl=23h59m59.129746458s
-2022-01-10T07:58:16.870317Z	info	cache	Root cert has changed, start rotating root cert
-2022-01-10T07:58:16.870328Z	info	ads	XDS: Incremental Pushing:0 ConnectedEndpoints:2 Version:
-2022-01-10T07:58:16.870491Z	info	cache	returned workload trust anchor from cache	ttl=23h59m59.129511057s
-2022-01-10T07:58:16.870672Z	info	cache	returned workload trust anchor from cache	ttl=23h59m59.129331341s
-2022-01-10T07:58:16.871142Z	info	ads	SDS: PUSH request for node:mvc.vmcluster resources:1 size:1.1kB resource:ROOTCA
-2022-01-10T07:58:16.871190Z	info	cache	returned workload trust anchor from cache	ttl=23h59m59.128812634s
-2022-01-10T07:58:16.871224Z	info	ads	SDS: PUSH for node:mvc.vmcluster resources:1 size:1.1kB resource:ROOTCA
-2022-01-10T07:58:16.870736Z	info	cache	returned workload certificate from cache	ttl=23h59m59.129265584s
-2022-01-10T07:58:16.871953Z	info	ads	SDS: PUSH request for node:mvc.vmcluster resources:1 size:4.0kB resource:default
+$ tail -f /var/log/istio/istio.log
+2022-01-10T12:29:12.168300Z	info	cache	generated new workload certificate	latency=176.531403ms ttl=23h59m59.831707486s
+2022-01-10T12:29:12.168330Z	info	cache	Root cert has changed, start rotating root cert
+2022-01-10T12:29:12.168341Z	info	ads	XDS: Incremental Pushing:0 ConnectedEndpoints:2 Version:
+2022-01-10T12:29:12.168432Z	info	cache	returned workload trust anchor from cache	ttl=23h59m59.831593702s
+2022-01-10T12:29:12.168466Z	info	cache	returned workload certificate from cache	ttl=23h59m59.831536073s
+2022-01-10T12:29:12.168535Z	info	cache	returned workload trust anchor from cache	ttl=23h59m59.831467947s
+2022-01-10T12:29:12.168940Z	info	ads	SDS: PUSH request for node:mvc.vmnamespace resources:1 size:1.1kB resource:ROOTCA
+2022-01-10T12:29:12.169019Z	info	cache	returned workload trust anchor from cache	ttl=23h59m59.830996231s
+2022-01-10T12:29:12.169044Z	info	ads	SDS: PUSH request for node:mvc.vmnamespace resources:1 size:4.0kB resource:default
+2022-01-10T12:29:12.169084Z	info	ads	SDS: PUSH for node:mvc.vmnamespace resources:1 size:1.1kB resource:ROOTCA
 
 ```
 
