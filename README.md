@@ -429,7 +429,7 @@ $ sudo sh -c 'cat hosts >> /etc/hosts'
 ```
 ```
 $ cat /etc/hosts |grep istiod
-192.168.121.222 istiod.istio-system.svc
+192.168.121.221 istiod.istio-system.svc
 ```
 
 ```
