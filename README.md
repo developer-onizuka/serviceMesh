@@ -399,7 +399,7 @@ EOF
 (6) Generate the istio-token and Copy it to the VM which you want to join into the cluster.
 ```
 # istioctl x workload entry configure -f workloadgroup.yaml -o "${WORK_DIR}" --clusterID "${CLUSTER}"
-Warning: a security token for namespace "vmcluster" and service account "nginxonmyvm" has been generated and stored at "/root/vmintegration/istio-token"
+Warning: a security token for namespace "vmnamespace" and service account "mysvcaccount" has been generated and stored at "/root/vmintegration/istio-token"
 Configuration generation into directory /root/vmintegration was successful
 ```
 ```
