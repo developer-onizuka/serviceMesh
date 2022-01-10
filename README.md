@@ -318,6 +318,10 @@ istiod                  ClusterIP      10.109.176.199   <none>            15010/
 gateway.networking.istio.io/istiod-gateway created
 virtualservice.networking.istio.io/istiod-vs created
 
+# kubectl apply -n istio-system -f samples/multicluster/expose-services.yaml
+
+```
+```
 # kubectl describe -n istio-system services istio-eastwestgateway 
 Name:                     istio-eastwestgateway
 Namespace:                istio-system
