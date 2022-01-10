@@ -206,7 +206,7 @@ Istio provides two mechanisms to represent virtual machine workloads:
 
 With this configuration, requests to product would be load-balanced across both the pod and virtual machine workload instances.
 
-See also https://istio.io/latest/docs/ops/deployment/vm-architecture/.
+See also https://istio.io/latest/docs/ops/deployment/vm-architecture/ and https://www.youtube.com/watch?v=0B8maYcjq_c.
 
 The following is a case of 
 - multiple cluster       (2 Clusters)
