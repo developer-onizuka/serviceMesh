@@ -247,7 +247,7 @@ Cluster1                                                Cluster2                
                                                                                                              in the cluster1 or2
 ```
 
-# 5-1. How to join virtual machines into the mesh
+# 5-1. How to join virtual machines into the mesh in different network
 https://istio.io/latest/docs/setup/install/virtual-machine/
 
 # 5-1-1. Create Secrets in kubernetes cluster
@@ -291,6 +291,7 @@ $ istioctl install -f vm-cluster.yaml
 $ istio-1.12.1/samples/multicluster/gen-eastwest-gateway.sh \
 --mesh mesh1 --cluster "${CLUSTER}" --network "${CLUSTER_NETWORK}" | \
 ```
+(4) Check the gateways
 ```
 $ kubectl get services -n istio-system
 NAME                    TYPE           CLUSTER-IP       EXTERNAL-IP       PORT(S)                                                           AGE
@@ -299,15 +300,20 @@ istio-ingressgateway    LoadBalancer   10.111.23.101    192.168.121.230   15021:
 istiod                  ClusterIP      10.99.43.125     <none>            15010/TCP,15012/TCP,443/TCP,15014/TCP                             5m37s
 
 ```
+(5) Create the Virtualservices for Control Plane and  Data Plane
+- Control Plane (istiod)
 ```
 $ kubectl apply -n istio-system -f istio-1.12.1/samples/multicluster/expose-istiod.yaml
 gateway.networking.istio.io/istiod-gateway created
 virtualservice.networking.istio.io/istiod-vs created
 ```
+- Data Plane (helloworld you run in next step)
 ```
 $ kubectl apply -n istio-system -f istio-1.12.1/samples/multicluster/expose-services.yaml
 gateway.networking.istio.io/cross-network-gateway created
 ```
+
+(6) Check all of them
 ```
 $ kubectl get -n istio-system gateway
 NAME                    AGE
@@ -411,7 +417,7 @@ Spec:
 Events:      <none>
 ```
 
-(4) Check if third party tokens are enabled in your cluster.
+(7) Check if third party tokens are enabled in your cluster.
 - See also https://istio.io/latest/docs/ops/best-practices/security/#configure-third-party-service-account-tokens
 ```
 $ kubectl get --raw /api/v1 | jq '.resources[] | select(.name | index("serviceaccounts/token"))'
@@ -427,7 +433,7 @@ $ kubectl get --raw /api/v1 | jq '.resources[] | select(.name | index("serviceac
   ]
 }
 ```
-(5) Make a Yaml file for workloadgroup.
+(8) Make a Yaml file for workloadgroup.
 ```
 $ cat <<EOF > workloadgroup.yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -444,7 +450,7 @@ spec:
     network: "${VM_NETWORK}"
 EOF
 ```
-(6) Generate the istio-token and Copy it to the VM which you want to join into the cluster.
+(9) Generate the istio-token and Copy it to the VM which you want to join into the cluster.
 ```
 $ istioctl x workload entry configure -f workloadgroup.yaml -o "${WORK_DIR}" --clusterID "${CLUSTER}"
 Warning: a security token for namespace "vmnamespace" and service account "mysvcaccount" has been generated and stored at "/home/vagrant/vmintegration/istio-token"
@@ -457,7 +463,7 @@ $ scp -p vmintegration.tar.gz vagrant@<ipaddress of vm>:/home/vagrant/
 ```
 
 # 5-1-2. Put the secrets in Virtual Machine
-
+(1) Copy them to the certain directry
 ```
 $ tar xvfz vmintegration.tar.gz
 $ cd vmintegration
@@ -466,27 +472,25 @@ $ sudo cp root-cert.pem /etc/certs/
 $ sudo mkdir -p /var/run/secrets/tokens
 $ sudo cp istio-token /var/run/secrets/tokens/
 ```
-
+(2) Install Istio Agent
 ```
 $ curl -LO https://storage.googleapis.com/istio-release/releases/1.12.1/deb/istio-sidecar.deb
 $ sudo dpkg -i istio-sidecar.deb
-```
-
-```
 $ sudo cp cluster.env /var/lib/istio/envoy/
 $ sudo cp mesh.yaml /etc/istio/config/mesh
+```
+(3) Add the host and IP to resolve 
+```
 $ sudo sh -c 'cat hosts >> /etc/hosts'
-```
-```
 $ cat /etc/hosts |grep istiod
 192.168.121.231 istiod.istio-system.svc
 ```
-
+(5) Change owner for each directry
 ```
 $ sudo mkdir -p /etc/istio/proxy
 $ sudo chown -R istio-proxy /var/lib/istio /etc/certs /etc/istio/proxy /etc/istio/config /var/run/secrets /etc/certs/root-cert.pem
 ```
-
+(6) Run istio Agent
 ```
 $ sudo systemctl start istio
 $ tail -f /var/log/istio/istio.log
@@ -500,7 +504,6 @@ $ tail -f /var/log/istio/istio.log
 2022-01-10T12:29:12.169019Z	info	cache	returned workload trust anchor from cache	ttl=23h59m59.830996231s
 2022-01-10T12:29:12.169044Z	info	ads	SDS: PUSH request for node:mvc.vmnamespace resources:1 size:4.0kB resource:default
 2022-01-10T12:29:12.169084Z	info	ads	SDS: PUSH for node:mvc.vmnamespace resources:1 size:1.1kB resource:ROOTCA
-
 ```
 
 # 5-1-3. Run services in kubernetes cluster
