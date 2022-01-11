@@ -320,8 +320,8 @@ istiod                  ClusterIP      10.99.43.125     <none>            15010/
 gateway.networking.istio.io/istiod-gateway created
 virtualservice.networking.istio.io/istiod-vs created
 
-# kubectl apply -n istio-system -f samples/multicluster/expose-services.yaml
-
+# kubectl apply -n istio-system -f istio-1.12.1/samples/multicluster/expose-services.yaml
+gateway.networking.istio.io/cross-network-gateway created
 ```
 ```
 # kubectl describe -n istio-system services istio-eastwestgateway 
