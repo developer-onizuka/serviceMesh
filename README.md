@@ -252,7 +252,7 @@ https://istio.io/latest/docs/setup/install/virtual-machine/
 
 # 5-1-1. Master node in kubernetes cluster
 
-(1) Set some environment valuse.
+(1) Set some environment values.
 ```
 VM_APP="vmapp"
 VM_NAMESPACE="vmnamespace"
