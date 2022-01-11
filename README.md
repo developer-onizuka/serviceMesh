@@ -250,7 +250,7 @@ Cluster1                                                Cluster2                
 # 5-1. How to join virtual machines into the mesh
 https://istio.io/latest/docs/setup/install/virtual-machine/
 
-# 5-1-1. Master node in kubernetes cluster
+# 5-1-1. Create Secrets in kubernetes cluster
 
 (1) Set some environment values.
 ```
@@ -456,7 +456,7 @@ $ tar cvfz vmintegration.tar.gz vmintegration/
 $ scp -p vmintegration.tar.gz vagrant@<ipaddress of vm>:/home/vagrant/
 ```
 
-# 5-1-2. Virtual Machine
+# 5-1-2. Put the secrets in Virtual Machine
 
 ```
 $ tar xvfz vmintegration.tar.gz
@@ -503,7 +503,7 @@ $ tail -f /var/log/istio/istio.log
 
 ```
 
-# 5-1-3. Make pods in kubernetes cluster
+# 5-1-3. Run services in kubernetes cluster
 ```
 $ kubectl apply -n vmnamespace -f istio-1.12.1/samples/helloworld/helloworld.yaml 
 service/helloworld created
@@ -511,7 +511,7 @@ deployment.apps/helloworld-v1 created
 deployment.apps/helloworld-v2 created
 ```
 
-# 5-1-4. Access from Virtual Machine
+# 5-1-4. Access to the service from Virtual Machine
 ```
 $ curl helloworld.vmnamespace.svc:5000/hello
 Hello version: v2, instance: helloworld-v2-5b46bc9f84-6dfmq
