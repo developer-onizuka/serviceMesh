@@ -264,15 +264,15 @@ CLUSTER="cluster1"
 ```
 (2) Make a work directory.
 ```
-# mkdir -p $WORK_DIR
-# kubectl create namespace "${VM_NAMESPACE}"
-# kubectl create serviceaccount "${SERVICE_ACCOUNT}" -n "${VM_NAMESPACE}"
+$ mkdir -p $WORK_DIR
+$ kubectl create namespace "${VM_NAMESPACE}"
+$ kubectl create serviceaccount "${SERVICE_ACCOUNT}" -n "${VM_NAMESPACE}"
 ```
 (3) Install the Istio control plane
 ```
-# curl -L https://istio.io/downloadIstio | sh -
-# export PATH=$PATH:/home/vagrant/istio-1.12.1/bin
-# cat <<EOF > ./vm-cluster.yaml
+$ curl -L https://istio.io/downloadIstio | sh -
+$ export PATH=$PATH:/home/vagrant/istio-1.12.1/bin
+$ cat <<EOF > ./vm-cluster.yaml
 apiVersion: install.istio.io/v1alpha1
 kind: IstioOperator
 metadata:
@@ -287,28 +287,12 @@ spec:
 EOF
 ```
 ```
-# istioctl install -f vm-cluster.yaml
-This will install the Istio 1.12.1 default profile with ["Istio core" "Istiod" "Ingress gateways"] components into the cluster. Proceed? (y/N) y
-✔ Istio core installed                                                                                                                                   
-✔ Istiod installed                                                                                                                                       
-✔ Ingress gateways installed                                                                                                                             
-✔ Installation complete                                                                                                                                 Making this installation the default for injection and validation.
-
-Thank you for installing Istio 1.12.  Please take a few minutes to tell us about your install/upgrade experience!  https://forms.gle/FegQbc9UvePd4Z9z7
-```
-```
-# istio-1.12.1/samples/multicluster/gen-eastwest-gateway.sh \
+$ istioctl install -f vm-cluster.yaml
+$ istio-1.12.1/samples/multicluster/gen-eastwest-gateway.sh \
 --mesh mesh1 --cluster "${CLUSTER}" --network "${CLUSTER_NETWORK}" | \
-istioctl install -y -f -
-
-✔ Ingress gateways installed
-✔ Installation complete
-Making this installation the default for injection and validation.
-
-Thank you for installing Istio 1.12.  Please take a few minutes to tell us about your install/upgrade experience!  https://forms.gle/FegQbc9UvePd4Z9z7
 ```
 ```
-# kubectl get services -n istio-system
+$ kubectl get services -n istio-system
 NAME                    TYPE           CLUSTER-IP       EXTERNAL-IP       PORT(S)                                                           AGE
 istio-eastwestgateway   LoadBalancer   10.100.219.251   192.168.121.231   15021:32740/TCP,15443:32261/TCP,15012:30627/TCP,15017:31259/TCP   103s
 istio-ingressgateway    LoadBalancer   10.111.23.101    192.168.121.230   15021:32569/TCP,80:30858/TCP,443:31696/TCP                        4m33s
@@ -316,65 +300,121 @@ istiod                  ClusterIP      10.99.43.125     <none>            15010/
 
 ```
 ```
-# kubectl apply -n istio-system -f istio-1.12.1/samples/multicluster/expose-istiod.yaml
+$ kubectl apply -n istio-system -f istio-1.12.1/samples/multicluster/expose-istiod.yaml
 gateway.networking.istio.io/istiod-gateway created
 virtualservice.networking.istio.io/istiod-vs created
-
-# kubectl apply -n istio-system -f istio-1.12.1/samples/multicluster/expose-services.yaml
+```
+```
+$ kubectl apply -n istio-system -f istio-1.12.1/samples/multicluster/expose-services.yaml
 gateway.networking.istio.io/cross-network-gateway created
 ```
 ```
-# kubectl describe -n istio-system services istio-eastwestgateway 
-Name:                     istio-eastwestgateway
-Namespace:                istio-system
-Labels:                   app=istio-eastwestgateway
-                          install.operator.istio.io/owning-resource=eastwest
-                          install.operator.istio.io/owning-resource-namespace=istio-system
-                          istio=eastwestgateway
-                          istio.io/rev=default
-                          operator.istio.io/component=IngressGateways
-                          operator.istio.io/managed=Reconcile
-                          operator.istio.io/version=1.12.1
-                          release=istio
-                          topology.istio.io/network=kube-network
-Annotations:              <none>
-Selector:                 app=istio-eastwestgateway,istio=eastwestgateway,topology.istio.io/network=kube-network
-Type:                     LoadBalancer
-IP Family Policy:         SingleStack
-IP Families:              IPv4
-IP:                       10.100.219.251
-IPs:                      10.100.219.251
-LoadBalancer Ingress:     192.168.121.231
-Port:                     status-port  15021/TCP
-TargetPort:               15021/TCP
-NodePort:                 status-port  32740/TCP
-Endpoints:                10.10.45.193:15021
-Port:                     tls  15443/TCP
-TargetPort:               15443/TCP
-NodePort:                 tls  32261/TCP
-Endpoints:                10.10.45.193:15443
-Port:                     tls-istiod  15012/TCP
-TargetPort:               15012/TCP
-NodePort:                 tls-istiod  30627/TCP
-Endpoints:                10.10.45.193:15012
-Port:                     tls-webhook  15017/TCP
-TargetPort:               15017/TCP
-NodePort:                 tls-webhook  31259/TCP
-Endpoints:                10.10.45.193:15017
-Session Affinity:         None
-External Traffic Policy:  Cluster
-Events:
-  Type    Reason        Age    From                Message
-  ----    ------        ----   ----                -------
-  Normal  IPAllocated   2m50s  metallb-controller  Assigned IP "192.168.121.231"
-  Normal  nodeAssigned  110s   metallb-speaker     announcing from node "worker1"
-  Normal  nodeAssigned  110s   metallb-speaker     announcing from node "worker8"
+$ kubectl get -n istio-system gateway
+NAME                    AGE
+cross-network-gateway   5m11s
+istiod-gateway          35m
+```
+```
+$ kubectl describe gateway -n istio-system cross-network-gateway 
+Name:         cross-network-gateway
+Namespace:    istio-system
+Labels:       <none>
+Annotations:  <none>
+API Version:  networking.istio.io/v1beta1
+Kind:         Gateway
+Metadata:
+  Creation Timestamp:  2022-01-11T00:23:32Z
+  Generation:          1
+  Managed Fields:
+    API Version:  networking.istio.io/v1alpha3
+    Fields Type:  FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .:
+          f:kubectl.kubernetes.io/last-applied-configuration:
+      f:spec:
+        .:
+        f:selector:
+          .:
+          f:istio:
+        f:servers:
+    Manager:         kubectl-client-side-apply
+    Operation:       Update
+    Time:            2022-01-11T00:23:32Z
+  Resource Version:  10242
+  UID:               7c721d93-d386-4b97-a988-a0f7cbd8845b
+Spec:
+  Selector:
+    Istio:  eastwestgateway
+  Servers:
+    Hosts:
+      *.local
+    Port:
+      Name:      tls
+      Number:    15443
+      Protocol:  TLS
+    Tls:
+      Mode:  AUTO_PASSTHROUGH
+Events:      <none>
+```
+```
+$ kubectl describe gateway -n istio-system istiod-gateway 
+Name:         istiod-gateway
+Namespace:    istio-system
+Labels:       <none>
+Annotations:  <none>
+API Version:  networking.istio.io/v1beta1
+Kind:         Gateway
+Metadata:
+  Creation Timestamp:  2022-01-10T23:52:59Z
+  Generation:          1
+  Managed Fields:
+    API Version:  networking.istio.io/v1alpha3
+    Fields Type:  FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .:
+          f:kubectl.kubernetes.io/last-applied-configuration:
+      f:spec:
+        .:
+        f:selector:
+          .:
+          f:istio:
+        f:servers:
+    Manager:         kubectl-client-side-apply
+    Operation:       Update
+    Time:            2022-01-10T23:52:59Z
+  Resource Version:  6108
+  UID:               2c064853-0f9b-486f-96a4-30f15771cab1
+Spec:
+  Selector:
+    Istio:  eastwestgateway
+  Servers:
+    Hosts:
+      *
+    Port:
+      Name:      tls-istiod
+      Number:    15012
+      Protocol:  tls
+    Tls:
+      Mode:  PASSTHROUGH
+    Hosts:
+      *
+    Port:
+      Name:      tls-istiodwebhook
+      Number:    15017
+      Protocol:  tls
+    Tls:
+      Mode:  PASSTHROUGH
+Events:      <none>
 ```
 
 (4) Check if third party tokens are enabled in your cluster.
 - See also https://istio.io/latest/docs/ops/best-practices/security/#configure-third-party-service-account-tokens
 ```
-# kubectl get --raw /api/v1 | jq '.resources[] | select(.name | index("serviceaccounts/token"))'
+$ kubectl get --raw /api/v1 | jq '.resources[] | select(.name | index("serviceaccounts/token"))'
 {
   "name": "serviceaccounts/token",
   "singularName": "",
@@ -389,7 +429,7 @@ Events:
 ```
 (5) Make a Yaml file for workloadgroup.
 ```
-# cat <<EOF > workloadgroup.yaml
+$ cat <<EOF > workloadgroup.yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: WorkloadGroup
 metadata:
@@ -406,14 +446,14 @@ EOF
 ```
 (6) Generate the istio-token and Copy it to the VM which you want to join into the cluster.
 ```
-# istioctl x workload entry configure -f workloadgroup.yaml -o "${WORK_DIR}" --clusterID "${CLUSTER}"
+$ istioctl x workload entry configure -f workloadgroup.yaml -o "${WORK_DIR}" --clusterID "${CLUSTER}"
 Warning: a security token for namespace "vmnamespace" and service account "mysvcaccount" has been generated and stored at "/home/vagrant/vmintegration/istio-token"
 Configuration generation into directory /home/vagrant/vmintegration was successful
 ```
 ```
-# cd /home/vagrant
-# tar cvfz vmintegration.tar.gz vmintegration/
-# scp -p vmintegration.tar.gz vagrant@<ipaddress of vm>:/home/vagrant/
+$ cd /home/vagrant
+$ tar cvfz vmintegration.tar.gz vmintegration/
+$ scp -p vmintegration.tar.gz vagrant@<ipaddress of vm>:/home/vagrant/
 ```
 
 # 5-1-2. Virtual Machine
