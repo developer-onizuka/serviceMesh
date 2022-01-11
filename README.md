@@ -310,10 +310,12 @@ Thank you for installing Istio 1.12.  Please take a few minutes to tell us about
 ```
 # kubectl get services -n istio-system
 NAME                    TYPE           CLUSTER-IP       EXTERNAL-IP       PORT(S)                                                           AGE
-istio-eastwestgateway   LoadBalancer   10.107.240.115   192.168.121.221   15021:32239/TCP,15443:31144/TCP,15012:32141/TCP,15017:31888/TCP   72s
-istio-ingressgateway    LoadBalancer   10.96.78.105     192.168.121.220   15021:32461/TCP,80:32400/TCP,443:30050/TCP                        5m10s
-istiod                  ClusterIP      10.109.176.199   <none>            15010/TCP,15012/TCP,443/TCP,15014/TCP
+istio-eastwestgateway   LoadBalancer   10.100.219.251   192.168.121.231   15021:32740/TCP,15443:32261/TCP,15012:30627/TCP,15017:31259/TCP   103s
+istio-ingressgateway    LoadBalancer   10.111.23.101    192.168.121.230   15021:32569/TCP,80:30858/TCP,443:31696/TCP                        4m33s
+istiod                  ClusterIP      10.99.43.125     <none>            15010/TCP,15012/TCP,443/TCP,15014/TCP                             5m37s
 
+```
+```
 # kubectl apply -n istio-system -f istio-1.12.1/samples/multicluster/expose-istiod.yaml
 gateway.networking.istio.io/istiod-gateway created
 virtualservice.networking.istio.io/istiod-vs created
@@ -334,38 +336,39 @@ Labels:                   app=istio-eastwestgateway
                           operator.istio.io/managed=Reconcile
                           operator.istio.io/version=1.12.1
                           release=istio
+                          topology.istio.io/network=kube-network
 Annotations:              <none>
-Selector:                 app=istio-eastwestgateway,istio=eastwestgateway
+Selector:                 app=istio-eastwestgateway,istio=eastwestgateway,topology.istio.io/network=kube-network
 Type:                     LoadBalancer
 IP Family Policy:         SingleStack
 IP Families:              IPv4
-IP:                       10.107.240.115
-IPs:                      10.107.240.115
-LoadBalancer Ingress:     192.168.121.221
+IP:                       10.100.219.251
+IPs:                      10.100.219.251
+LoadBalancer Ingress:     192.168.121.231
 Port:                     status-port  15021/TCP
 TargetPort:               15021/TCP
-NodePort:                 status-port  32239/TCP
-Endpoints:                10.10.45.194:15021
+NodePort:                 status-port  32740/TCP
+Endpoints:                10.10.45.193:15021
 Port:                     tls  15443/TCP
 TargetPort:               15443/TCP
-NodePort:                 tls  31144/TCP
-Endpoints:                10.10.45.194:15443
+NodePort:                 tls  32261/TCP
+Endpoints:                10.10.45.193:15443
 Port:                     tls-istiod  15012/TCP
 TargetPort:               15012/TCP
-NodePort:                 tls-istiod  32141/TCP
-Endpoints:                10.10.45.194:15012
+NodePort:                 tls-istiod  30627/TCP
+Endpoints:                10.10.45.193:15012
 Port:                     tls-webhook  15017/TCP
 TargetPort:               15017/TCP
-NodePort:                 tls-webhook  31888/TCP
-Endpoints:                10.10.45.194:15017
+NodePort:                 tls-webhook  31259/TCP
+Endpoints:                10.10.45.193:15017
 Session Affinity:         None
 External Traffic Policy:  Cluster
 Events:
   Type    Reason        Age    From                Message
   ----    ------        ----   ----                -------
-  Normal  IPAllocated   3m3s   metallb-controller  Assigned IP "192.168.121.221"
-  Normal  nodeAssigned  2m58s  metallb-speaker     announcing from node "worker8"
-  Normal  nodeAssigned  2m57s  metallb-speaker     announcing from node "worker1"
+  Normal  IPAllocated   2m50s  metallb-controller  Assigned IP "192.168.121.231"
+  Normal  nodeAssigned  110s   metallb-speaker     announcing from node "worker1"
+  Normal  nodeAssigned  110s   metallb-speaker     announcing from node "worker8"
 ```
 
 (4) Check if third party tokens are enabled in your cluster.
