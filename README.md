@@ -503,7 +503,15 @@ $ tail -f /var/log/istio/istio.log
 
 ```
 
-# 5-1-3. Access from Virtual Machine
+# 5-1-3. Make pods in kubernetes cluster
+```
+$ kubectl apply -n vmnamespace -f istio-1.12.1/samples/helloworld/helloworld.yaml 
+service/helloworld created
+deployment.apps/helloworld-v1 created
+deployment.apps/helloworld-v2 created
+```
+
+# 5-1-4. Access from Virtual Machine
 ```
 $ curl helloworld.vmnamespace.svc:5000/hello
 Hello version: v2, instance: helloworld-v2-5b46bc9f84-6dfmq
