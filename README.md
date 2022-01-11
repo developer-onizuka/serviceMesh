@@ -503,4 +503,31 @@ $ tail -f /var/log/istio/istio.log
 
 ```
 
+# 5-1-3. Access from Virtual Machine
+```
+$ curl helloworld.vmnamespace.svc:5000/hello
+Hello version: v2, instance: helloworld-v2-5b46bc9f84-6dfmq
+```
+```
+$ curl helloworld.vmnamespace.svc:5000/hello -v
+*   Trying 10.99.203.164:5000...
+* TCP_NODELAY set
+* Connected to helloworld.vmnamespace.svc (10.99.203.164) port 5000 (#0)
+> GET /hello HTTP/1.1
+> Host: helloworld.vmnamespace.svc:5000
+> User-Agent: curl/7.68.0
+> Accept: */*
+> 
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< content-type: text/html; charset=utf-8
+< content-length: 60
+< server: envoy
+< date: Tue, 11 Jan 2022 00:54:05 GMT
+< x-envoy-upstream-service-time: 102
+< 
+Hello version: v2, instance: helloworld-v2-5b46bc9f84-6dfmq
+* Connection #0 to host helloworld.vmnamespace.svc left intact
+```
+
 
