@@ -298,7 +298,6 @@ NAME                    TYPE           CLUSTER-IP       EXTERNAL-IP       PORT(S
 istio-eastwestgateway   LoadBalancer   10.100.219.251   192.168.121.231   15021:32740/TCP,15443:32261/TCP,15012:30627/TCP,15017:31259/TCP   103s
 istio-ingressgateway    LoadBalancer   10.111.23.101    192.168.121.230   15021:32569/TCP,80:30858/TCP,443:31696/TCP                        4m33s
 istiod                  ClusterIP      10.99.43.125     <none>            15010/TCP,15012/TCP,443/TCP,15014/TCP                             5m37s
-
 ```
 (5) Create the Virtualservices for Control Plane and  Data Plane
 - Control Plane (istiod)
