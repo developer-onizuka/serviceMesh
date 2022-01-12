@@ -564,3 +564,6 @@ $ curl helloworld.vmnamespace.svc:5000/hello -v
 Hello version: v2, instance: helloworld-v2-5b46bc9f84-6dfmq
 * Connection #0 to host helloworld.vmnamespace.svc left intact
 ```
+
+https://istio.io/latest/blog/2020/workload-entry/
+
