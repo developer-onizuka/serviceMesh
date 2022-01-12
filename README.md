@@ -512,6 +512,31 @@ service/helloworld created
 deployment.apps/helloworld-v1 created
 deployment.apps/helloworld-v2 created
 ```
+```
+# cat <<EOF | sudo kubectl apply -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dnsutils
+  namespace: vmnamespace
+  labels:
+    name: dnsutils
+spec:
+  containers:
+  - name: dnsutils
+    image: tutum/dnsutils
+    command:
+    - sleep
+    - "3600"
+EOF
+
+# kubectl exec -n vmnamespace -it dnsutils -- nslookup helloworld
+Server:		10.96.0.10
+Address:	10.96.0.10#53
+
+Name:	helloworld.vmnamespace.svc.cluster.local
+Address: 10.99.203.164
+```
 
 # 5-1-4. Access to the service from Virtual Machine
 ```
@@ -539,5 +564,3 @@ $ curl helloworld.vmnamespace.svc:5000/hello -v
 Hello version: v2, instance: helloworld-v2-5b46bc9f84-6dfmq
 * Connection #0 to host helloworld.vmnamespace.svc left intact
 ```
-
-
