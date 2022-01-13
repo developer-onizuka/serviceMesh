@@ -300,13 +300,13 @@ istio-ingressgateway    LoadBalancer   10.111.23.101    192.168.121.230   15021:
 istiod                  ClusterIP      10.99.43.125     <none>            15010/TCP,15012/TCP,443/TCP,15014/TCP                             5m37s
 ```
 (5) Create the Virtualservices for Control Plane and  Data Plane
-- Control Plane (istiod)
+- Control Plane (for istiod)
 ```
 $ kubectl apply -n istio-system -f istio-1.12.1/samples/multicluster/expose-istiod.yaml
 gateway.networking.istio.io/istiod-gateway created
 virtualservice.networking.istio.io/istiod-vs created
 ```
-- Data Plane (helloworld you run in next step)
+- Data Plane (for helloworld you run in next step)
 ```
 $ kubectl apply -n istio-system -f istio-1.12.1/samples/multicluster/expose-services.yaml
 gateway.networking.istio.io/cross-network-gateway created
