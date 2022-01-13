@@ -517,25 +517,30 @@ deployment.apps/helloworld-v2 created
 apiVersion: v1
 kind: Pod
 metadata:
-  name: dnsutils
+  name: ubuntu
   namespace: vmnamespace
   labels:
-    name: dnsutils
+    name: ubuntu
 spec:
   containers:
-  - name: dnsutils
-    image: tutum/dnsutils
+  - name: ubuntu
+    image: ubuntu:20.04
     command:
     - sleep
-    - "3600"
+    - "36000"
 EOF
 
-# kubectl exec -n vmnamespace -it dnsutils -- nslookup helloworld
+# kubectl exec -n vmnamespace -it ubuntu -- apt-get update
+# kubectl exec -n vmnamespace -it ubuntu -- apt-get install -y curl dnsutils
+# kubectl exec -n vmnamespace -it ubuntu -- nslookup helloworld
 Server:		10.96.0.10
 Address:	10.96.0.10#53
 
 Name:	helloworld.vmnamespace.svc.cluster.local
 Address: 10.99.203.164
+
+# kubectl exec -n vmnamespace -it ubuntu -- curl helloworld:5000/hello
+Hello version: v2, instance: helloworld-v2-5b46bc9f84-6dfmq
 ```
 
 # 5-1-4. Access to the service from Virtual Machine
