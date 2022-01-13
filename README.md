@@ -513,7 +513,7 @@ deployment.apps/helloworld-v1 created
 deployment.apps/helloworld-v2 created
 ```
 ```
-# cat <<EOF | sudo kubectl apply -f -
+$ cat <<EOF | sudo kubectl apply -f -
 apiVersion: v1
 kind: Pod
 metadata:
@@ -530,21 +530,28 @@ spec:
     - "36000"
 EOF
 
-# kubectl exec -n vmnamespace -it ubuntu -- apt-get update
-# kubectl exec -n vmnamespace -it ubuntu -- apt-get install -y curl dnsutils
-# kubectl exec -n vmnamespace -it ubuntu -- nslookup helloworld
+$ kubectl exec -n vmnamespace -it ubuntu -- apt-get update
+$ kubectl exec -n vmnamespace -it ubuntu -- apt-get install -y curl dnsutils
+$ kubectl exec -n vmnamespace -it ubuntu -- nslookup helloworld
 Server:		10.96.0.10
 Address:	10.96.0.10#53
 
 Name:	helloworld.vmnamespace.svc.cluster.local
 Address: 10.99.203.164
 
-# kubectl exec -n vmnamespace -it ubuntu -- curl helloworld:5000/hello
+$ kubectl exec -n vmnamespace -it ubuntu -- curl helloworld:5000/hello
 Hello version: v2, instance: helloworld-v2-5b46bc9f84-6dfmq
 ```
 
 # 5-1-4. Access to the service from Virtual Machine
 ```
+$ nslookup helloworld.vmnamespace.svc
+Server:		127.0.0.53
+Address:	127.0.0.53#53
+
+Name:	helloworld.vmnamespace.svc
+Address: 10.99.203.164
+
 $ curl helloworld.vmnamespace.svc:5000/hello
 Hello version: v2, instance: helloworld-v2-5b46bc9f84-6dfmq
 ```
