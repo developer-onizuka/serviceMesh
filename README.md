@@ -290,6 +290,7 @@ EOF
 $ istioctl install -f vm-cluster.yaml
 $ istio-1.12.1/samples/multicluster/gen-eastwest-gateway.sh \
 --mesh mesh1 --cluster "${CLUSTER}" --network "${CLUSTER_NETWORK}" | \
+istioctl install -y -f -
 ```
 (4) Check the gateways
 ```
