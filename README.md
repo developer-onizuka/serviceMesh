@@ -295,10 +295,10 @@ istioctl install -y -f -
 (4) Check the gateways
 ```
 $ kubectl get services -n istio-system
-NAME                    TYPE           CLUSTER-IP       EXTERNAL-IP       PORT(S)                                                           AGE
-istio-eastwestgateway   LoadBalancer   10.100.219.251   192.168.121.231   15021:32740/TCP,15443:32261/TCP,15012:30627/TCP,15017:31259/TCP   103s
-istio-ingressgateway    LoadBalancer   10.111.23.101    192.168.121.230   15021:32569/TCP,80:30858/TCP,443:31696/TCP                        4m33s
-istiod                  ClusterIP      10.99.43.125     <none>            15010/TCP,15012/TCP,443/TCP,15014/TCP                             5m37s
+NAME                    TYPE           CLUSTER-IP       EXTERNAL-IP      PORT(S)                                                           AGE
+istio-eastwestgateway   LoadBalancer   10.109.178.196   192.168.33.221   15021:30600/TCP,15443:31534/TCP,15012:31242/TCP,15017:30426/TCP   49m
+istio-ingressgateway    LoadBalancer   10.110.212.70    192.168.33.220   15021:31932/TCP,80:30217/TCP,443:31930/TCP                        51m
+istiod                  ClusterIP      10.111.13.175    <none>           15010/TCP,15012/TCP,443/TCP,15014/TCP 
 ```
 (5) Create the Virtualservices for Control Plane and  Data Plane
 - Control Plane (for istiod)
@@ -483,7 +483,7 @@ $ sudo cp mesh.yaml /etc/istio/config/mesh
 ```
 $ sudo sh -c 'cat hosts >> /etc/hosts'
 $ cat /etc/hosts |grep istiod
-192.168.121.231 istiod.istio-system.svc
+192.168.33.221 istiod.istio-system.svc
 ```
 (5) Change owner for each directry
 ```
@@ -508,6 +508,7 @@ $ tail -f /var/log/istio/istio.log
 
 # 5-1-3. Run services in kubernetes cluster
 ```
+$ kubectl label namespace vmnamespace istio-injection=enabled
 $ kubectl apply -n vmnamespace -f istio-1.12.1/samples/helloworld/helloworld.yaml 
 service/helloworld created
 deployment.apps/helloworld-v1 created
@@ -528,7 +529,7 @@ spec:
     image: ubuntu:20.04
     command:
     - sleep
-    - "36000"
+    - "360000"
 EOF
 
 $ kubectl exec -n vmnamespace -it ubuntu -- apt-get update
@@ -538,10 +539,10 @@ Server:		10.96.0.10
 Address:	10.96.0.10#53
 
 Name:	helloworld.vmnamespace.svc.cluster.local
-Address: 10.99.203.164
+Address: 10.98.163.121
 
 $ kubectl exec -n vmnamespace -it ubuntu -- curl helloworld:5000/hello
-Hello version: v2, instance: helloworld-v2-5b46bc9f84-6dfmq
+Hello version: v2, instance: helloworld-v2-5b46bc9f84-bd6qj
 ```
 
 # 5-1-4. Access to the service from Virtual Machine
@@ -551,16 +552,16 @@ Server:		127.0.0.53
 Address:	127.0.0.53#53
 
 Name:	helloworld.vmnamespace.svc
-Address: 10.99.203.164
+Address: 10.98.163.121
 
 $ curl helloworld.vmnamespace.svc:5000/hello
-Hello version: v2, instance: helloworld-v2-5b46bc9f84-6dfmq
+Hello version: v2, instance: helloworld-v2-5b46bc9f84-bd6qj
 ```
 ```
 $ curl helloworld.vmnamespace.svc:5000/hello -v
-*   Trying 10.99.203.164:5000...
+*   Trying 10.98.163.121:5000...
 * TCP_NODELAY set
-* Connected to helloworld.vmnamespace.svc (10.99.203.164) port 5000 (#0)
+* Connected to helloworld.vmnamespace.svc (10.98.163.121) port 5000 (#0)
 > GET /hello HTTP/1.1
 > Host: helloworld.vmnamespace.svc:5000
 > User-Agent: curl/7.68.0
@@ -571,10 +572,10 @@ $ curl helloworld.vmnamespace.svc:5000/hello -v
 < content-type: text/html; charset=utf-8
 < content-length: 60
 < server: envoy
-< date: Tue, 11 Jan 2022 00:54:05 GMT
-< x-envoy-upstream-service-time: 102
+< date: Fri, 14 Jan 2022 03:56:35 GMT
+< x-envoy-upstream-service-time: 98
 < 
-Hello version: v2, instance: helloworld-v2-5b46bc9f84-6dfmq
+Hello version: v2, instance: helloworld-v2-5b46bc9f84-bd6qj
 * Connection #0 to host helloworld.vmnamespace.svc left intact
 ```
 
