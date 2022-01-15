@@ -585,7 +585,7 @@ https://istio.io/latest/blog/2020/workload-entry/
 # 5-2-1. Run nginx workload on Virtual Machine as a non-kubernetes Endpoint
 ```
 $ sudo docker pull nginx:1.16.1
-$ sudo docker run --rm --name nginx -d -p 8080:80 nginx:1.16.1
+$ sudo docker run --rm --name nginx -d -p 80:80 nginx:1.16.1
 $ curl -s 127.0.0.1:8080 |grep -o "<title>.*</title>"
 <title>Welcome to nginx!</title>
 ```
@@ -601,6 +601,7 @@ metadata:
 spec:
   ports:
   - port: 8080
+    targetPort: 80
     name: tcp
   selector:
     app: nginx-vm
