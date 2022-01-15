@@ -753,6 +753,7 @@ EOF
 ```
 ```
 ![kiali2](https://user-images.githubusercontent.com/67852921/149621749-61c66be1-564a-484f-9192-14e47c57082d.png)
+https://user-images.githubusercontent.com/67852921/149621749-61c66be1-564a-484f-9192-14e47c57082d.png
 ```
 
 
