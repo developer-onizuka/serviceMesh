@@ -678,7 +678,7 @@ NAME            HOSTS                                            LOCATION       
 nginx-vm-svce   ["nginx-vm-svc.vmnamespace.svc.cluster.local"]   MESH_INTERNAL   STATIC       62m
 ```
 
-# 5-4. For the Access thru IngressGateway from outside of Mesh
+# 5-2-4. For the Access thru IngressGateway from outside of Mesh
 ```
 $ cat <<EOF | kubectl apply -n vmnamespace -f -
 apiVersion: networking.istio.io/v1alpha3
