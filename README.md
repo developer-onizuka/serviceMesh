@@ -585,9 +585,10 @@ https://istio.io/latest/blog/2020/workload-entry/
 # 5-2-1. Run nginx workload on Virtual Machine as a non-kubernetes Endpoint
 ```
 $ sudo docker pull nginx:1.16.1
-$ sudo docker run --rm --name nginx -d -p 80:80 nginx:1.16.1
-$ curl -s 127.0.0.1:8080 |grep -o "<title>.*</title>"
-<title>Welcome to nginx!</title>
+$ sudo docker run --rm --name nginx -d -p 8081:80 nginx:1.16.1
+$ sudo docker exec -it nginx sed -id s/Welcome\ to/Welcome\ to\ VM\'s/g /usr/share/nginx/html/index.html
+$ curl -s 127.0.0.1:80 |grep "<title>.*</title>"
+<title>Welcome to VM's nginx!</title>
 ```
 # 5-2-2. Create the service for the non-kubernetes Endpoint in kubernetes cluster
 ```
@@ -601,7 +602,7 @@ metadata:
 spec:
   ports:
   - port: 8080
-    targetPort: 80
+    targetPort: 8081
     name: tcp
   selector:
     app: nginx-vm
@@ -645,9 +646,41 @@ NAME            AGE   ADDRESS
 nginx-vm-wkle   62m   192.168.33.112
 ```
 ```
-$ kubectl exec -n vmnamespace -it ubuntu -- curl nginx-vm-svc.vmnamespace.svc:8080 |grep -o "<title>.*</title>"
-<title>Welcome to nginx!</title>
+$ kubectl exec -n vmnamespace -it ubuntu -- curl nginx-vm-svc.vmnamespace.svc:8080 |grep "<title>.*</title>"
+<title>Welcome to VM's nginx!</title>
 ```
+
+# 5-2-4. LoadBalance between Pod and WorkloadEntry
+```
+$ cat <<EOF | sudo kubectl apply -n vmnamespace -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-vm-test
+spec:
+  selector:
+    matchLabels:
+      app: nginx-vm
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx-vm
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.16.1
+        ports:
+        - containerPort: 8081
+EOF
+```
+```
+$ kubectl exec -n vmnamespace -it ubuntu -- curl nginx-vm-svc.vmnamespace.svc:8080 |grep "<title>.*</title>"
+<title>Welcome to nginx!</title>
+$ kubectl exec -n vmnamespace -it ubuntu -- curl nginx-vm-svc.vmnamespace.svc:8080 |grep "<title>.*</title>"
+<title>Welcome to VM's nginx!</title>
+```
+
 
 # Option) Create ServiceEntry in kubernetes cluster
 You might need ServiceEntry in addition to WorkloadEntry.
@@ -679,7 +712,7 @@ NAME            HOSTS                                            LOCATION       
 nginx-vm-svce   ["nginx-vm-svc.vmnamespace.svc.cluster.local"]   MESH_INTERNAL   STATIC       62m
 ```
 
-# 5-2-4. For the Access thru IngressGateway from outside of Mesh
+# 5-2-5. For the Access thru IngressGateway from outside of Mesh
 ```
 $ cat <<EOF | kubectl apply -n vmnamespace -f -
 apiVersion: networking.istio.io/v1alpha3
