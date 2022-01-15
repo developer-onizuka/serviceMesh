@@ -751,7 +751,9 @@ spec:
         host: nginx-vm-svc
 EOF
 ```
-
+```
+![kiali2](https://user-images.githubusercontent.com/67852921/149621641-8d1ce1ca-bb1d-4232-8ef5-da19c21259e0.png)
+```
 
 
 
