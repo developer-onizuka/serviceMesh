@@ -585,9 +585,9 @@ https://istio.io/latest/blog/2020/workload-entry/
 # 5-2-1. Run nginx workload on Virtual Machine as a non-kubernetes Endpoint
 ```
 $ sudo docker pull nginx:1.16.1
-$ sudo docker run --rm --name nginx -d -p 8081:80 nginx:1.16.1
+$ sudo docker run --rm --name nginx -d -p 80:80 nginx:1.16.1
 $ sudo docker exec -it nginx sed -id s/Welcome\ to/Welcome\ to\ VM\'s/g /usr/share/nginx/html/index.html
-$ curl -s 127.0.0.1:80 |grep "<title>.*</title>"
+$ curl -s 127.0.0.1 |grep "<title>.*</title>"
 <title>Welcome to VM's nginx!</title>
 ```
 # 5-2-2. Create the service for the non-kubernetes Endpoint in kubernetes cluster
@@ -602,7 +602,7 @@ metadata:
 spec:
   ports:
   - port: 8080
-    targetPort: 8081
+    targetPort: 80
     name: tcp
   selector:
     app: nginx-vm
@@ -614,13 +614,12 @@ Server:		10.96.0.10
 Address:	10.96.0.10#53
 
 Name:	nginx-vm-svc.vmnamespace.svc.cluster.local
-Address: 10.101.24.93
+Address: 10.108.92.68
 ```
 
 But this moment, You can not access to the FQDN of "nginx-vm-svc.vmnamespace.svc.cluster.local". You should bind between the service and IP address of Virtual Machine.
 ```
-$ kubectl exec -n vmnamespace -it ubuntu -- curl nginx-vm-svc.vmnamespace.svc:8080 |grep -o "<title>.*</title>"
-curl: (56) Recv failure: Connection reset by peer
+$ kubectl exec -n vmnamespace -it ubuntu -- curl nginx-vm-svc.vmnamespace.svc:8080 |grep "<title>.*</title>"
 command terminated with exit code 56
 ```
 
@@ -671,12 +670,13 @@ spec:
       - name: nginx
         image: nginx:1.16.1
         ports:
-        - containerPort: 8081
+        - containerPort: 80
 EOF
 ```
 ```
 $ kubectl exec -n vmnamespace -it ubuntu -- curl nginx-vm-svc.vmnamespace.svc:8080 |grep "<title>.*</title>"
 <title>Welcome to nginx!</title>
+
 $ kubectl exec -n vmnamespace -it ubuntu -- curl nginx-vm-svc.vmnamespace.svc:8080 |grep "<title>.*</title>"
 <title>Welcome to VM's nginx!</title>
 ```
