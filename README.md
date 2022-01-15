@@ -579,5 +579,88 @@ Hello version: v2, instance: helloworld-v2-5b46bc9f84-bd6qj
 * Connection #0 to host helloworld.vmnamespace.svc left intact
 ```
 
+# 5-2. A Non-Kubernetes Endpoint
 https://istio.io/latest/blog/2020/workload-entry/
 
+# 5-2-1. Run nginx workload on Virtual Machine as a non-kubernetes Endpoint
+```
+$ sudo docker pull nginx:1.16.1
+$ sudo docker run --rm --name nginx -d -p 8080:80 nginx:1.16.1
+$ curl -s 127.0.0.1:8080 | grep -o "<title>.*</title>"
+<title>Welcome to nginx!</title>
+```
+# 5-2-2. Create the service for the non-kubernetes Endpoint in kubernetes cluster
+```
+$ cat <<EOF | kubectl apply -n vmnamespace -f -
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-vm-svc
+  labels:
+    app: nginx-vm
+spec:
+  ports:
+  - port: 8080
+    name: tcp
+  selector:
+    app: nginx-vm
+EOF
+```
+```
+$ kubectl describe -n vmnamespace services nginx-vm-svc
+Name:              nginx-vm-svc
+Namespace:         vmnamespace
+Labels:            app=nginx-vm
+Annotations:       <none>
+Selector:          app=nginx-vm
+Type:              ClusterIP
+IP Family Policy:  SingleStack
+IP Families:       IPv4
+IP:                10.110.62.13
+IPs:               10.110.62.13
+Port:              tcp  8080/TCP
+TargetPort:        8080/TCP
+Endpoints:         <none>
+Session Affinity:  None
+Events:            <none>
+```
+
+# 5-2-3. Create ServiceEntry in kubernetes cluster
+ServiceEntry enables adding additional entries into Istio’s internal service registry. "nginx-vm-svc.vmnamespace.svc.cluster.local" in yaml is FQDN which is created by kind of Service in 5-2-2 above. But it is not accessible as is, so you should specify the destination FQDN as a Service Entry so that it can access internally inside of mesh.
+```
+$ cat <<EOF | kubectl apply -n vmnamespace -f -
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: nginx-vm-svce
+spec:
+  hosts:
+  - nginx-vm-svc.vmnamespace.svc.cluster.local
+  location: MESH_INTERNAL
+  ports:
+  - number: 8080
+    name: http
+    protocol: HTTP
+  resolution: STATIC
+  workloadSelector:
+    labels:
+      app: nginx-vm
+EOF
+```
+
+# 5-2-4. Create WorkloadEntry in kubernetes cluster
+WorkloadEntry allows you to describe non-Pod endpoints that should still be part of the mesh, and treat them the same as a Pod. You should specify the IP address of the Virtual Machine which you run some workloads on.
+```
+$ cat <<EOF | kubectl apply -n vmnamespace -f -
+apiVersion: networking.istio.io/v1alpha3
+kind: WorkloadEntry
+metadata:
+  name: nginx-vm-wkle
+spec:
+  #serviceAccount: mysvcaccount
+  address: 192.168.33.112
+  labels:
+    app: nginx-vm
+    instance-id: ubuntu-vm-nginx
+EOF
+```
