@@ -653,7 +653,7 @@ NAME            HOSTS                                            LOCATION       
 nginx-vm-svce   ["nginx-vm-svc.vmnamespace.svc.cluster.local"]   MESH_INTERNAL   STATIC       62m
 ```
 # 5-2-4. Create WorkloadEntry in kubernetes cluster
-WorkloadEntry allows you to describe non-Pod endpoints that should still be part of the mesh, and treat them the same as a Pod. You should specify the IP address of the Virtual Machine which you run some workloads on.
+WorkloadEntry allows you to describe non-Pod endpoints that should still be part of the mesh, and treat them the same as a Pod. Specify the IP address of the Virtual Machine running nginx container on, so that the "nginx-vm" defined in label of app can be bound for the IP address of 192.168.33.112.
 ```
 $ cat <<EOF | kubectl apply -n vmnamespace -f -
 apiVersion: networking.istio.io/v1alpha3
