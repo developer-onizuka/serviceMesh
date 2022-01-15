@@ -617,7 +617,7 @@ Name:	nginx-vm-svc.vmnamespace.svc.cluster.local
 Address: 10.108.92.68
 ```
 
-But this moment, You can not access to the FQDN of "nginx-vm-svc.vmnamespace.svc.cluster.local". You should bind between the service and IP address of Virtual Machine.
+But at this moment, You can not access to the FQDN of "nginx-vm-svc.vmnamespace.svc.cluster.local". You should bind between the service and IP address of Virtual Machine.
 ```
 $ kubectl exec -n vmnamespace -it ubuntu -- curl nginx-vm-svc.vmnamespace.svc:8080 |grep "<title>.*</title>"
 command terminated with exit code 56
@@ -650,6 +650,7 @@ $ kubectl exec -n vmnamespace -it ubuntu -- curl nginx-vm-svc.vmnamespace.svc:80
 ```
 
 # 5-2-4. LoadBalance between Pod and WorkloadEntry
+First of all, Create deployment which runs nginx in the kubernetes cluster. Please note label used by selecting endpoints is defined as "app" and "nginx-vm".
 ```
 $ cat <<EOF | sudo kubectl apply -n vmnamespace -f -
 apiVersion: apps/v1
@@ -750,3 +751,8 @@ spec:
         host: nginx-vm-svc
 EOF
 ```
+
+
+
+
+
