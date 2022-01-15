@@ -648,6 +648,7 @@ nginx-vm-wkle   62m   192.168.33.112
 $ kubectl exec -n vmnamespace -it ubuntu -- curl nginx-vm-svc.vmnamespace.svc:8080 |grep "<title>.*</title>"
 <title>Welcome to VM's nginx!</title>
 ```
+![kiali](https://github.com/developer-onizuka/serviceMesh/blob/main/kiali.png)
 
 # 5-2-4. LoadBalance between Pod and WorkloadEntry
 First of all, Create deployment which runs nginx in the kubernetes cluster. Please note label used by selecting endpoints is defined as "app" and "nginx-vm".
