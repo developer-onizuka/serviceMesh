@@ -647,7 +647,11 @@ spec:
       app: nginx-vm
 EOF
 ```
-
+```
+$ kubectl get -n vmnamespace serviceentry
+NAME            HOSTS                                            LOCATION        RESOLUTION   AGE
+nginx-vm-svce   ["nginx-vm-svc.vmnamespace.svc.cluster.local"]   MESH_INTERNAL   STATIC       62m
+```
 # 5-2-4. Create WorkloadEntry in kubernetes cluster
 WorkloadEntry allows you to describe non-Pod endpoints that should still be part of the mesh, and treat them the same as a Pod. You should specify the IP address of the Virtual Machine which you run some workloads on.
 ```
@@ -663,4 +667,9 @@ spec:
     app: nginx-vm
     instance-id: ubuntu-vm-nginx
 EOF
+```
+```
+$ kubectl get -n vmnamespace workloadentry
+NAME            AGE   ADDRESS
+nginx-vm-wkle   62m   192.168.33.112
 ```
