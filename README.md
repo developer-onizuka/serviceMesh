@@ -650,7 +650,7 @@ $ kubectl exec -n vmnamespace -it ubuntu -- curl nginx-vm-svc.vmnamespace.svc:80
 
 # 5-2-4. Create ServiceEntry in kubernetes cluster
 You might need ServiceEntry in addition to WorkloadEntry.
-ServiceEntry enables adding additional entries into Istio’s internal service registry. "nginx-vm-svc.vmnamespace.svc.cluster.local" in yaml is FQDN which is created by kind of Service in 5-2-2 above. But it is not accessible as is, so you should specify the destination FQDN as a Service Entry so that it can access internally inside of mesh.
+ServiceEntry enables adding additional entries into Istio’s internal service registry. "nginx-vm-svc.vmnamespace.svc.cluster.local" in yaml is FQDN which is created by kind of Service in 5-2-2 above. But it might be not accessible as is due to some reasons, then you could specify the destination FQDN as a Service Entry so that it can access internally inside of mesh.
 ```
 $ cat <<EOF | kubectl apply -n vmnamespace -f -
 apiVersion: networking.istio.io/v1alpha3
