@@ -586,7 +586,7 @@ https://istio.io/latest/blog/2020/workload-entry/
 ```
 $ sudo docker pull nginx:1.16.1
 $ sudo docker run --rm --name nginx -d -p 8080:80 nginx:1.16.1
-$ curl -s 127.0.0.1:8080 | grep -o "<title>.*</title>"
+$ curl -s 127.0.0.1:8080 |grep -o "<title>.*</title>"
 <title>Welcome to nginx!</title>
 ```
 # 5-2-2. Create the service for the non-kubernetes Endpoint in kubernetes cluster
@@ -607,25 +607,49 @@ spec:
 EOF
 ```
 ```
-$ kubectl describe -n vmnamespace services nginx-vm-svc
-Name:              nginx-vm-svc
-Namespace:         vmnamespace
-Labels:            app=nginx-vm
-Annotations:       <none>
-Selector:          app=nginx-vm
-Type:              ClusterIP
-IP Family Policy:  SingleStack
-IP Families:       IPv4
-IP:                10.110.62.13
-IPs:               10.110.62.13
-Port:              tcp  8080/TCP
-TargetPort:        8080/TCP
-Endpoints:         <none>
-Session Affinity:  None
-Events:            <none>
+$ kubectl exec -n vmnamespace -it ubuntu -- nslookup nginx-vm-svc
+Server:		10.96.0.10
+Address:	10.96.0.10#53
+
+Name:	nginx-vm-svc.vmnamespace.svc.cluster.local
+Address: 10.101.24.93
 ```
 
-# 5-2-3. Create ServiceEntry in kubernetes cluster
+But this moment, You can not access to the FQDN of "nginx-vm-svc.vmnamespace.svc.cluster.local". You should bind between the service and IP address of Virtual Machine.
+```
+$ kubectl exec -n vmnamespace -it ubuntu -- curl nginx-vm-svc.vmnamespace.svc:8080 |grep -o "<title>.*</title>"
+curl: (56) Recv failure: Connection reset by peer
+command terminated with exit code 56
+```
+
+# 5-2-3. Create WorkloadEntry in kubernetes cluster
+WorkloadEntry allows you to describe non-Pod endpoints that should still be part of the mesh, and treat them the same as a Pod. Specify the IP address of the Virtual Machine running nginx container on, so that the "nginx-vm" defined in label of app can be bound for the IP address of 192.168.33.112.
+```
+$ cat <<EOF | kubectl apply -n vmnamespace -f -
+apiVersion: networking.istio.io/v1alpha3
+kind: WorkloadEntry
+metadata:
+  name: nginx-vm-wkle
+spec:
+  #serviceAccount: mysvcaccount
+  address: 192.168.33.112
+  labels:
+    app: nginx-vm
+    instance-id: ubuntu-vm-nginx
+EOF
+```
+```
+$ kubectl get -n vmnamespace workloadentry
+NAME            AGE   ADDRESS
+nginx-vm-wkle   62m   192.168.33.112
+```
+```
+$ kubectl exec -n vmnamespace -it ubuntu -- curl nginx-vm-svc.vmnamespace.svc:8080 |grep -o "<title>.*</title>"
+<title>Welcome to nginx!</title>
+```
+
+# 5-2-4. Create ServiceEntry in kubernetes cluster
+You might need ServiceEntry in addition to WorkloadEntry.
 ServiceEntry enables adding additional entries into Istio’s internal service registry. "nginx-vm-svc.vmnamespace.svc.cluster.local" in yaml is FQDN which is created by kind of Service in 5-2-2 above. But it is not accessible as is, so you should specify the destination FQDN as a Service Entry so that it can access internally inside of mesh.
 ```
 $ cat <<EOF | kubectl apply -n vmnamespace -f -
@@ -651,25 +675,4 @@ EOF
 $ kubectl get -n vmnamespace serviceentry
 NAME            HOSTS                                            LOCATION        RESOLUTION   AGE
 nginx-vm-svce   ["nginx-vm-svc.vmnamespace.svc.cluster.local"]   MESH_INTERNAL   STATIC       62m
-```
-# 5-2-4. Create WorkloadEntry in kubernetes cluster
-WorkloadEntry allows you to describe non-Pod endpoints that should still be part of the mesh, and treat them the same as a Pod. Specify the IP address of the Virtual Machine running nginx container on, so that the "nginx-vm" defined in label of app can be bound for the IP address of 192.168.33.112.
-```
-$ cat <<EOF | kubectl apply -n vmnamespace -f -
-apiVersion: networking.istio.io/v1alpha3
-kind: WorkloadEntry
-metadata:
-  name: nginx-vm-wkle
-spec:
-  #serviceAccount: mysvcaccount
-  address: 192.168.33.112
-  labels:
-    app: nginx-vm
-    instance-id: ubuntu-vm-nginx
-EOF
-```
-```
-$ kubectl get -n vmnamespace workloadentry
-NAME            AGE   ADDRESS
-nginx-vm-wkle   62m   192.168.33.112
 ```
