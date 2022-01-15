@@ -651,6 +651,7 @@ $ kubectl exec -n vmnamespace -it ubuntu -- curl nginx-vm-svc.vmnamespace.svc:80
 # Option) Create ServiceEntry in kubernetes cluster
 You might need ServiceEntry in addition to WorkloadEntry.
 ServiceEntry enables adding additional entries into Istio’s internal service registry. "nginx-vm-svc.vmnamespace.svc.cluster.local" in yaml is FQDN which is created by kind of Service in 5-2-2 above. But it might be not accessible as is due to some reasons, then you could specify the destination FQDN as a Service Entry so that it can access internally inside of mesh.
+- https://blog.1q77.com/2020/03/istio-part7/
 ```
 $ cat <<EOF | kubectl apply -n vmnamespace -f -
 apiVersion: networking.istio.io/v1alpha3
@@ -675,4 +676,43 @@ EOF
 $ kubectl get -n vmnamespace serviceentry
 NAME            HOSTS                                            LOCATION        RESOLUTION   AGE
 nginx-vm-svce   ["nginx-vm-svc.vmnamespace.svc.cluster.local"]   MESH_INTERNAL   STATIC       62m
+```
+
+# 5-4. For the Access thru IngressGateway from outside of Mesh
+```
+$ cat <<EOF | kubectl apply -n vmnamespace -f -
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: vm-gateway
+spec:
+  selector:
+    istio: ingressgateway # use Istio default gateway implementation
+  servers:
+  - port:
+      number: 8080
+      name: vm-gateway
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: nginx-vm-vsvc
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - vm-gateway
+  http:
+  - match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        port:
+          number: 8080
+        host: nginx-vm-svc
+EOF
 ```
