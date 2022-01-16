@@ -650,7 +650,7 @@ $ kubectl exec -n vmnamespace -it ubuntu -- curl nginx-vm-svc.vmnamespace.svc:80
 ```
 ![kiali](https://github.com/developer-onizuka/serviceMesh/blob/main/kiali.png)
 
-# 5-2-4. LoadBalance between Pod and WorkloadEntry
+# 5-2-4. LoadBalancing between Pod and WorkloadEntry
 First of all, Create deployment which runs nginx in the kubernetes cluster. Please note label used by selecting endpoints is defined as "app" and "nginx-vm".
 ```
 $ cat <<EOF | sudo kubectl apply -n vmnamespace -f -
@@ -752,6 +752,7 @@ spec:
         host: nginx-vm-svc
 EOF
 ```
+Green Line is the access of http://192.168.33.220 that is thru IngressGateway. Blue Line is the access of curl to VM or Pod with loadbalancing.
 ![kiali2](https://github.com/developer-onizuka/serviceMesh/blob/main/kiali2.png)
 
 
