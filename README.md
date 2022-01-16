@@ -73,6 +73,7 @@ Cluster1                                                Cluster2
 - Each cluster must have a DNS entry for the service in order for the DNS lookup to succeed, and a request to be successfully sent. This is true even if there are no instances of that service’s pods running in the cluster which makes requests.
 - For clusters spanning networks, this can be achieved by exposing the control plane through an Istio gateway which goes thru such as internal load balancers. (But I don't draw the Istio gateway in the figure below, because of no space to draw it and it also gets so complicating to understand.)
 - Istio Citadel is for CA (Certificate Authority). See also https://www.youtube.com/watch?v=LmZz8KpSY74.
+- See also the video about mTLS (https://www.youtube.com/watch?v=7_O58efytvM)
 
 The following is a case of 
 - multiple cluster
@@ -248,7 +249,7 @@ Cluster1                                                Cluster2                
 ```
 
 # 5-1. How to join virtual machines into the mesh in different network
-https://istio.io/latest/docs/setup/install/virtual-machine/
+> https://istio.io/latest/docs/setup/install/virtual-machine/
 
 # 5-1-1. Create Secrets in kubernetes cluster
 
@@ -580,7 +581,7 @@ Hello version: v2, instance: helloworld-v2-5b46bc9f84-bd6qj
 ```
 
 # 5-2. A Non-Kubernetes Endpoint
-https://istio.io/latest/blog/2020/workload-entry/
+> https://istio.io/latest/blog/2020/workload-entry/
 
 # 5-2-1. Run nginx workload on Virtual Machine as a non-kubernetes Endpoint
 ```
@@ -686,8 +687,8 @@ $ kubectl exec -n vmnamespace -it ubuntu -- curl nginx-vm-svc.vmnamespace.svc:80
 
 # Option) Create ServiceEntry in kubernetes cluster
 You might need ServiceEntry in addition to WorkloadEntry.
-ServiceEntry enables adding additional entries into Istio’s internal service registry. "nginx-vm-svc.vmnamespace.svc.cluster.local" in yaml is FQDN which is created by kind of Service in 5-2-2 above. But it might be not accessible as is due to some reasons, then you could specify the destination FQDN as a Service Entry so that it can access internally inside of mesh.
-- https://blog.1q77.com/2020/03/istio-part7/
+ServiceEntry enables adding additional entries into Istio’s internal service registry. "nginx-vm-svc.vmnamespace.svc.cluster.local" in yaml is FQDN which is created by kind of Service in 5-2-2 above. But it might be not accessible as is due to some reasons (by default, older version of Istio locks down outbound traffic), then you could specify the destination FQDN as a Service Entry so that it can access internally inside of mesh.
+> https://blog.1q77.com/2020/03/istio-part7/
 ```
 $ cat <<EOF | kubectl apply -n vmnamespace -f -
 apiVersion: networking.istio.io/v1alpha3
